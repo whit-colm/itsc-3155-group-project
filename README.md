@@ -1,1 +1,1 @@
-# itsc-3155-group-project
+# ITSC-3155 Group project repository
