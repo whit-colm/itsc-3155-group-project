@@ -4,4 +4,7 @@ Need a point in the right direction about references? missed a sentence the prof
 
 ## AskHole - A Crowdsourced Instant Tutoring Service
 
+# Links
 
+- [Discord Server](discord.gg/W85MhY7UeC)
+- [Google drive](https://drive.google.com/drive/folders/110rt5EttsVBUEuiXnQ2rox7iT5Gb0nqq)
