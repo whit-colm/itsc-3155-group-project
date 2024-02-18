@@ -49,3 +49,27 @@ curl http://localhost:8080/albums \
     --request "POST" `# the request type, must be POST to match the handler` \
     --data '{' # junk data
 ```
+
+## GET `/albums/:id`
+
+There is a GET handler at `/albums/:id`. `:id` in this case is a parameter mapped to the ID of an album. It returns either a status code 200 with the JSON representing an album with the id of `:id` (e.g. 1, 2, 3, ...) or a status code 404 if no such album with that ID exists. 
+
+This can be viewed in browser by navigating to `localhost:8080/albums`. 
+
+You can also use the `curl` command
+
+```bash
+# an album with ID 1 is guarenteed to exist, see the albums slice on
+# line 18 of main.go
+curl http://localhost:8080/albums/1 \
+    --include \
+    --request "GET"
+```
+
+```bash
+# Try GETting an album with an ID that does not exist, then adding one
+# via POST.
+curl http://localhost:8080/albums/? \
+    --include \
+    --request "GET"
+```

@@ -54,12 +54,32 @@ func postAlbums(c *gin.Context) {
 	c.IndentedJSON(http.StatusCreated, newAlbum)
 }
 
+// getAlbumByID locates the album whose ID value matches the id
+// parameter sent by the client, then returns that album as a response.
+func getAlbumByID(c *gin.Context) {
+	// the :id in main gets processed here
+	// https://pkg.go.dev/github.com/gin-gonic/gin#Context.Param
+	id := c.Param("id")
+
+	// Loop over the list of albums, looking for
+	// an album whose ID value matches the parameter.
+	for _, a := range albums {
+		if a.ID == id {
+			c.IndentedJSON(http.StatusOK, a)
+			return
+		}
+	}
+	c.IndentedJSON(http.StatusNotFound, gin.H{"message": "album not found"})
+}
+
 func main() {
 	// Gets a "default" gin.Engine, with some default kit attached
 	// like a logger and recovery. Don't worry about this.
 	router := gin.Default()
-	// HTTP GET requests to /albums sjpi;d send the json from getAlbums
+	// HTTP GET requests to /albums will receive the json from getAlbums
 	router.GET("/albums", getAlbums)
+	// HTTP GET requests to /albums/:id will receive the album with id ":id" (1, 2, 3, ...)
+	router.GET("/albums/:id", getAlbumByID)
 	router.POST("/albums", postAlbums)
 
 	// Run the thing at localhost:8080
