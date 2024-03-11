@@ -1,19 +1,29 @@
 import React from 'react';
 import './App.css';
 import Navbar from './components/Navbar';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Home from './components/pages/Home';
+import Threadpage from './components/pages/Threadpage';
+import SignUpPage from './components/pages/SignUpPage';
+import ClassPage from './components/pages/ClassesPage';
+
 
 function App() {
-  return (
-    <Router>
+  return(
+
+    <BrowserRouter>
       <Navbar />
       <Routes>
-        <Route path='/' exact element={<Home />} />
-        {/* Define other routes here */}
-      </Routes>
-    </Router>
+        <Route>
+            <Route path='/' element={<Home />}/>
+            <Route path='/classes' element={<ClassPage />} />
+            <Route path="/threads" element={<Threadpage />} />
+            <Route path="/SignUpPage" element={<SignUpPage />} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
   );
 }
+
 
 export default App;

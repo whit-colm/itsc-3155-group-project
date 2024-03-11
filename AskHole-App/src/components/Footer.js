@@ -46,7 +46,7 @@ function Footer() {
           <div class='footer-link-items'>
             <h2>Social Media</h2>
             <Link to='/'>Instagram</Link>
-            <Link to='/'>Facebook</Link>
+            <Link to='https://github.com/whit-colm/itsc-3155-group-project'>Github</Link>
             <Link to='/'>Youtube</Link>
             <Link to='/'>Twitter</Link>
           </div>
