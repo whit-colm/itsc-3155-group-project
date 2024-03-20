@@ -1,0 +1,55 @@
+.threads-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Center items horizontally */
+    background: linear-gradient(to bottom, black, gray); /* Black to gray gradient */
+    min-height: 100vh; /* Ensure the container takes at least the height of the viewport */
+    padding: 20px; /* Add padding for better readability */
+  }
+  
+  .message-container {
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin-bottom: 10px;
+    width: 80%; /* Set a fixed width to each message container */
+    max-width: 400px; /* Set a maximum width to prevent containers from becoming too wide */
+    background-color: white; /* Set a white background for messages */
+    border-radius: 8px; /* Add border radius for rounded corners */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Add shadow for depth */
+  }
+  
+  .input-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center; /* Center items vertically */
+    width: 80%;
+    max-width: 400px;
+    margin-top: 10px;
+  }
+  
+  .input-container input[type="text"] {
+    flex: 1;
+    border-radius: 20px; /* Make input round */
+    padding: 10px; /* Add padding for better appearance */
+    border: 1px solid #ccc; /* Add border */
+  }
+  
+  .input-container button[type="submit"], .message-container button {
+    border: none;
+    background-color: #007bff; /* Button background color */
+    color: white; /* Button text color */
+    padding: 10px 20px; /* Button padding */
+    border-radius: 20px; /* Make button round */
+    cursor: pointer;
+  }
+  .message-container button {
+    padding: 5px 10px; /* Half the padding of the submit button */
+  }
+  .timestamp {
+    font-size: 0.8em; /* Adjust the font size */
+    color: #666; /* Adjust the color */
+    position: absolute;
+    top: 5px; /* Adjust the top position */
+    right: 5px; /* Adjust the right position */
+  }
+    
