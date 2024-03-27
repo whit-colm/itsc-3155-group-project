@@ -1,0 +1,67 @@
+video {
+    object-fit: cover;
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    z-index: -1;
+  }
+  .hero-container{
+    display: flex;
+    flex-direction: column;
+    gap: 10rem;
+
+  }
+  .heading-container {
+    text-align: center;
+  }
+  .heading-container > h1 {
+    color: #fff;
+    font-size: 100px;
+    margin-top: -50px;
+  }
+  
+  .heading-container > p {
+    margin-top: 8px;
+    color: #fff;
+    font-size: 25px;
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande',
+      'Lucida Sans', Arial, sans-serif;
+  }
+  .support-container {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
+  
+  .box {
+    flex: 1 1 30%; /* this sets the box elements to take up 30% of the container width, but can shrink and grow as needed */
+    margin-bottom: 15px;
+    border: 1px solid #7b7b7b;
+    background-color: #ccc;
+    border-radius: 8px;
+    padding: 15px;
+    box-sizing: border-box;
+  }
+  
+  .box h1 {
+    font-size: 1.5em;
+    margin-bottom: 10px;
+  }
+  
+  .box p {
+    font-size: 1em;
+    line-height: 1.5;
+  }
+  
+  @media screen and (max-width: 768px) {
+    .support-container {
+      flex-wrap: wrap;
+    }
+  
+    .box {
+      width: 100%;
+    }
+  }
+    
+  
+ 
