@@ -15,10 +15,29 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
+from django.http import HttpResponse
 from django.urls import path
+
+def not_implemented(request):
+    return HttpResponse(status=501)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-]
 
-#Hihk
+    path('/objs/profile/', not_implemented),
+    path('/objs/tags/new/', not_implemented),
+    path('/objs/tags/{tags}/', not_implemented),
+    path('/objs/reporttags/', not_implemented),
+
+    path('/reports/', not_implemented),
+    path('/reports/new/', not_implemented),
+    path('/reports/{reportID}/', not_implemented),
+    path('/reports/{reportID}/hide/', not_implemented),
+
+    path('/threads/', not_implemented),
+    path('/threads/new/', not_implemented),
+    path('/threads/{threadID}/', not_implemented),
+    path('/threads/{threadID}/award/', not_implemented),
+    path('/threads/{threadID}/new/', not_implemented),
+    path('/threads/{threadID}/{msgID}/vote/', not_implemented),
+]
