@@ -31,6 +31,7 @@ video {
     display: flex;
     justify-content: space-between;
     flex-wrap: wrap;
+    gap: 200px;
   }
   
   .box {
@@ -41,6 +42,7 @@ video {
     border-radius: 8px;
     padding: 15px;
     box-sizing: border-box;
+
   }
   
   .box h1 {
