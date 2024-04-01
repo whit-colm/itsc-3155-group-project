@@ -15,29 +15,39 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.http import HttpResponse
+from django.http import JsonResponse
 from django.urls import path
 
-def not_implemented(request):
-    return HttpResponse(status=501)
+'''
+# Not used. left around just in case.
+def not_implemented(request, threadID=None, msgID=None, tag=None, reportID=None):
+    if request.accepts('application/json'):
+        return not_implemented_JSON(request, threadID, msgID, tag, reportID)
+
+    text= f'<h1>501 NOT IMPLEMENTED.</h1><p>Here&#x2019s what we got:<br><ul><li>Thread ID: <code>{threadID}</code></li><li>Message ID: <code>{msgID}</code></li><li>Tag: <code>{tag}</code></li><li>Report ID: <code>{reportID}</code></li></ul></p>'
+    return HttpResponse(text, status=501)
+'''
+
+def not_implemented(request, threadID=None, msgID=None, tag=None, reportID=None):
+    return JsonResponse({"method":request.method, "threadID":threadID,"msgID":msgID,"tag":tag,"reportID":reportID}, safe=False, status=501)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
 
-    path('/objs/profile/', not_implemented),
-    path('/objs/tags/new/', not_implemented),
-    path('/objs/tags/{tags}/', not_implemented),
-    path('/objs/reporttags/', not_implemented),
+    path('objs/profile/', not_implemented),
+    path('objs/tags/new/', not_implemented),
+    path('objs/tags/<str:tag>/', not_implemented),
+    path('objs/reporttags/', not_implemented),
 
-    path('/reports/', not_implemented),
-    path('/reports/new/', not_implemented),
-    path('/reports/{reportID}/', not_implemented),
-    path('/reports/{reportID}/hide/', not_implemented),
+    path('reports/', not_implemented),
+    path('reports/new/', not_implemented),
+    path('report/<uuid:reportID>/', not_implemented),
+    path('report/<uuid:reportID>/hide/', not_implemented),
 
-    path('/threads/', not_implemented),
-    path('/threads/new/', not_implemented),
-    path('/threads/{threadID}/', not_implemented),
-    path('/threads/{threadID}/award/', not_implemented),
-    path('/threads/{threadID}/new/', not_implemented),
-    path('/threads/{threadID}/{msgID}/vote/', not_implemented),
+    path('threads/', not_implemented),
+    path('threads/new/', not_implemented),
+    path('thread/<uuid:threadID>/', not_implemented),
+    path('thread/<uuid:threadID>/award/', not_implemented),
+    path('thread/<uuid:threadID>/new/', not_implemented),
+    path('thread/<uuid:threadID>/<uuid:msgID>/vote/', not_implemented),
 ]
