@@ -19,7 +19,7 @@ myworld\Scripts\activate.bat
 ```
 pip install django
 pip install djangorestframework
-``
+```
 
 ## Running the server
 
