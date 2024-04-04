@@ -181,3 +181,5 @@ cython_debug/
 
 # Go workspace file
 go.work
+server/askserver/askserver/migrations/0001_initial.py
+server/askserver/askserver/migrations/__init__.py
