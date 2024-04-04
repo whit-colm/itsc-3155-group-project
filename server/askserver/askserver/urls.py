@@ -17,6 +17,7 @@ Including another URLconf
 from django.contrib import admin
 from django.http import JsonResponse
 from django.urls import path
+from askserver import views
 
 '''
 # Not used. left around just in case.
@@ -39,7 +40,7 @@ urlpatterns = [
     path('objs/tags/<str:tag>/', not_implemented),
     path('objs/reporttags/', not_implemented),
 
-    path('reports/', not_implemented),
+    path('reports/', views.get_reports, name='get_reports'),
     path('reports/new/', not_implemented),
     path('report/<uuid:reportID>/', not_implemented),
     path('report/<uuid:reportID>/hide/', not_implemented),
