@@ -14,7 +14,7 @@ function SignUp()
       <div className='SignUp-container'>
         <video src='/video/SignUpVideo.mp4' autoPlay loop muted />
         <h1>Welcome To Your Profile</h1>
-        <Auth />
+
       </div>
     );
   }

@@ -2,13 +2,15 @@ import React from 'react';
 import '../../App.css';
 import Hero from '../Hero';
 import Footer from '../Footer';
+import Posts from '../Posts';
+
 
 
 
 function Home() {
   return (
     <>
-      <Hero />
+      <Posts /> 
       <Footer />
     </>
   );
