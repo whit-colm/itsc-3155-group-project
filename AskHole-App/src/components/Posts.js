@@ -1,11 +1,15 @@
+// Inside the Posts.js file
+
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Link } from 'react-router-dom'; // Import Link from react-router-dom
-import './Posts.css'; // Import the CSS file
+import { Link } from 'react-router-dom';
+import './Posts.css';
 
 const Posts = () => {
   const [posts, setPosts] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [showMenu, setShowMenu] = useState(null); // State to track which comment's menu is open
+
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -21,7 +25,6 @@ const Posts = () => {
   }, []);
 
   const handleLike = (postId) => {
-    // Implement like functionality here
     console.log(`Liked post with ID ${postId}`);
   };
 
@@ -32,6 +35,9 @@ const Posts = () => {
   const filteredPosts = posts.filter(post =>
     post.title.toLowerCase().includes(searchTerm.toLowerCase())
   );
+  const toggleMenu = (postId) => {
+    setShowMenu(showMenu === postId ? null : postId);
+  };
 
   return (
     <div className="post-list">
@@ -39,14 +45,25 @@ const Posts = () => {
         type="text"
         placeholder="Search by title"
         value={searchTerm}
-        onChange={handleSearch} className='searchBar'
+        onChange={handleSearch}
+        className='searchBar'
       />
       {filteredPosts.map((post) => (
         <div key={post.id} className="post-item">
+          <div className="kabob-menu" onClick={() => toggleMenu(post.id)}>
+              <div className="kabob-icon"></div>
+              {showMenu === post.id && (
+                <div className="kabob-content">
+                  <p>Username: {post.userName}</p>
+                  <button onClick={() => console.log("Block")}>Block</button>
+                  <button onClick={() => console.log("Report")}>Report</button>
+                </div>
+              )}
+            </div>
           <h2 className="post-title">{post.title}</h2>
           <p className="post-body">{post.body}</p>
-          <button onClick={() => handleLike(post.id)}>Like</button> {/* Like button */}
-          <Link to={`/posts/${post.id}`}>Read More</Link> {/* Link to specific post */}
+          <button onClick={() => handleLike(post.id)}>Like</button>
+          <Link to={`/posts/${post.id}`}>Read More</Link>
         </div>
       ))}
     </div>

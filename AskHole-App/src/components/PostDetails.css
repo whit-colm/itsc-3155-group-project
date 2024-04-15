@@ -23,4 +23,112 @@
   .comment-submit-btn:hover {
     background-color: #0056b3;
   }
-  
+  /* PostDetails.css */
+
+.comment-box {
+  border: 1px solid #ccc; /* Add border */
+  border-radius: 5px; /* Add border radius */
+  padding: 10px; /* Add padding */
+  margin-bottom: 20px; /* Add margin between comments */
+  background-color: #f9f9f9; /* Add background color */
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px; /* Add margin between user info and comment content */
+}
+
+.user-photo {
+  width: 50px; /* Adjust size as needed */
+  height: 50px; /* Adjust size as needed */
+  border-radius: 50%; /* Make the image circular */
+  margin-right: 10px; /* Add margin between photo and text */
+}
+
+.user-name {
+  font-weight: bold;
+  margin-bottom: 5px; /* Add margin between name and role */
+}
+
+.user-role {
+  color: #666; /* Adjust color as needed */
+  font-size: 14px; /* Adjust size as needed */
+}
+
+.comment-name {
+  font-weight: bold;
+  margin-bottom: 5px; /* Add margin between name and body */
+}
+
+.comment-body {
+  margin: 0;
+}
+/* PostDetails.css */
+
+.comment-box {
+  position: relative; /* Ensure relative positioning for the kabob menu */
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 10px;
+  margin-bottom: 20px;
+  background-color: #f9f9f9;
+}
+
+.kabob-menu {
+  position: absolute;
+  top: 5px; /* Adjust top position */
+  right: 5px; /* Adjust right position */
+  cursor: pointer;
+  z-index: 1; /* Ensure it's above other content */
+}
+
+.kabob-icon {
+  width: 20px;
+  height: 20px;
+  background-color: #ccc;
+  border-radius: 50%;
+}
+
+.kabob-content {
+  position: absolute;
+  top: 25px; /* Adjust top position */
+  right: 0; /* Align to the right */
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 5px;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1); /* Add shadow for visibility */
+  z-index: 2; /* Ensure it's above other content */
+}
+
+/* PostDetails.css */
+
+.post-details-container .post-title {
+  text-align: center; /* Center align the title */
+  background-color: #007bff; /* Change background color */
+  color: #fff; /* Change text color */
+  padding: 10px 20px; /* Add padding */
+  border-radius: 5px; /* Add border radius */
+  margin-bottom: 10px; /* Add margin */
+}
+
+.post-details-container .post-body {
+  text-align: center; /* Center align the body */
+  background-color: #f2f2f2; /* Change background color */
+  padding: 20px; /* Add padding */
+  border-radius: 5px; /* Add border radius */
+}
+.comment-icons {
+  position: absolute;
+  top: 5px; /* Adjust top position */
+  right: 30px; /* Adjust right position */
+  display: flex;
+}
+
+.comment-icons .icon {
+  width: 20px; /* Adjust icon size */
+  height: 20px; /* Adjust icon size */
+  background-color: #ccc; /* Icon background color */
+  margin-left: 5px; /* Add some space between icons */
+}

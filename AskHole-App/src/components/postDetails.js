@@ -8,6 +8,7 @@ const PostDetails = () => {
   const [post, setPost] = useState(null);
   const [comments, setComments] = useState([]);
   const [commentText, setCommentText] = useState('');
+  const [showMenu, setShowMenu] = useState(null); // State to track which comment's menu is open
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -47,6 +48,11 @@ const PostDetails = () => {
     }
   };
 
+  // Function to toggle the menu for a comment
+  const toggleMenu = (commentId) => {
+    setShowMenu(showMenu === commentId ? null : commentId);
+  };
+
   if (!post) {
     return <div>Loading...</div>;
   }
@@ -60,6 +66,30 @@ const PostDetails = () => {
       <div className="comments-container">
         {comments.map(comment => (
           <div key={comment.id} className="comment-box">
+            {/* Icons */}
+            <div className="comment-icons">
+              {/* Icon 1 */}
+              <div className="icon">Icon 1</div>
+              {/* Icon 2 */}
+              <div className="icon">Icon 2</div>
+              {/* Icon 3 */}
+              <div className="icon">Icon 3</div>
+            </div>
+            {/* End of Icons */}
+
+            {/* Kabob menu */}
+            <div className="kabob-menu" onClick={() => toggleMenu(comment.id)}>
+              <div className="kabob-icon"></div>
+              {showMenu === comment.id && (
+                <div className="kabob-content">
+                  <p>Username: {comment.userName}</p>
+                  <button onClick={() => console.log("Block")}>Block</button>
+                  <button onClick={() => console.log("Report")}>Report</button>
+                </div>
+              )}
+            </div>
+            {/* End of Kabob menu */}
+
             <strong className="comment-name">{comment.name}</strong>: 
             <p className="comment-body">{comment.body}</p>
           </div>
