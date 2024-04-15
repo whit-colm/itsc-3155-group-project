@@ -35,7 +35,7 @@ def not_implemented(request, threadID=None, msgID=None, tag=None, reportID=None)
 urlpatterns = [
     path('admin/', admin.site.urls),
 
-    path('objs/profile/', not_implemented),
+    path('objs/profile/', views.get_user_profile, name='user_profile'),
     path('objs/tags/new/', not_implemented),
     path('objs/tags/<str:tag>/', not_implemented),
     path('objs/reporttags/', not_implemented),
