@@ -35,18 +35,19 @@ def not_implemented(request, threadID=None, msgID=None, tag=None, reportID=None)
 urlpatterns = [
     path('admin/', admin.site.urls),
 
-    path('objs/profile/', not_implemented),
-    path('objs/tags/new/', not_implemented),
-    path('objs/tags/<str:tag>/', not_implemented),
-    path('objs/reporttags/', not_implemented),
+    path('objs/profile/', views.get_user_profile, name='user_profile'),
+    path('objs/tags/', views.get_all_tags, name='get_all_tags'),
+    path('objs/tags/new/', views.create_tag, name='create_tag'),
+    path('objs/tags/<str:tag>/', views.delete_tag, name='delete_tag'),
+    path('objs/reporttags/', views.get_report_tags, name='get_report_tags'),
 
     path('reports/', views.get_reports, name='get_reports'),
-    path('reports/new/', not_implemented),
-    path('report/<uuid:reportID>/', not_implemented),
-    path('report/<uuid:reportID>/hide/', not_implemented),
+    path('reports/new/', views.create_report, name='create_report'),
+    path('report/<uuid:reportID>/', views.get_report_by_id, name='get_report_by_id'),
+    path('report/<uuid:reportID>/hide/', views.toggle_message_visibility, name='toggle_message_visibility'),
 
-    path('threads/', not_implemented),
-    path('threads/new/', not_implemented),
+    path('threads/', views.get_threads, name='get_threads'),
+    path('threads/new/', views.create_thread, name='create_thread'),
     path('thread/<uuid:threadID>/', not_implemented),
     path('thread/<uuid:threadID>/award/', not_implemented),
     path('thread/<uuid:threadID>/new/', not_implemented),
