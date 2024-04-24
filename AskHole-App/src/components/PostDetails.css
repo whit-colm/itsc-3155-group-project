@@ -132,3 +132,12 @@
   background-color: #ccc; /* Icon background color */
   margin-left: 5px; /* Add some space between icons */
 }
+.post-item button {
+  background-color: blue;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 8px;
+}

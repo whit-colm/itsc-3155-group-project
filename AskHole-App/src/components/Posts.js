@@ -1,15 +1,14 @@
-// Inside the Posts.js file
-
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import './Posts.css';
+import CreateThreadsModal from './CreateThreadsModal';
 
 const Posts = () => {
   const [posts, setPosts] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [showMenu, setShowMenu] = useState(null); // State to track which comment's menu is open
-
+  const [showMenu, setShowMenu] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -24,20 +23,23 @@ const Posts = () => {
     fetchPosts();
   }, []);
 
-  const handleLike = (postId) => {
-    console.log(`Liked post with ID ${postId}`);
-  };
-
   const handleSearch = (event) => {
     setSearchTerm(event.target.value);
+  };
+
+  const toggleMenu = (postId) => {
+    setShowMenu(showMenu === postId ? null : postId);
+  };
+
+  const handleSubmit = (formData) => {
+    // Prepend new post to posts array
+    setPosts([formData, ...posts]);
+    setIsModalOpen(false);
   };
 
   const filteredPosts = posts.filter(post =>
     post.title.toLowerCase().includes(searchTerm.toLowerCase())
   );
-  const toggleMenu = (postId) => {
-    setShowMenu(showMenu === postId ? null : postId);
-  };
 
   return (
     <div className="post-list">
@@ -48,21 +50,22 @@ const Posts = () => {
         onChange={handleSearch}
         className='searchBar'
       />
+      <button onClick={() => setIsModalOpen(true)}>Create Thread</button>
+      <CreateThreadsModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSubmit={handleSubmit} />
       {filteredPosts.map((post) => (
         <div key={post.id} className="post-item">
           <div className="kabob-menu" onClick={() => toggleMenu(post.id)}>
-              <div className="kabob-icon"></div>
-              {showMenu === post.id && (
-                <div className="kabob-content">
-                  <p>Username: {post.userName}</p>
-                  <button onClick={() => console.log("Block")}>Block</button>
-                  <button onClick={() => console.log("Report")}>Report</button>
-                </div>
-              )}
-            </div>
+            <div className="kabob-icon"></div>
+            {showMenu === post.id && (
+              <div className="kabob-content">
+                <p>Username: {post.userName}</p>
+                <button onClick={() => console.log("Block")}>Block</button>
+                <button onClick={() => console.log("Report")}>Report</button>
+              </div>
+            )}
+          </div>
           <h2 className="post-title">{post.title}</h2>
           <p className="post-body">{post.body}</p>
-          <button onClick={() => handleLike(post.id)}>Like</button>
           <Link to={`/posts/${post.id}`}>Read More</Link>
         </div>
       ))}

@@ -57,6 +57,10 @@ const PostDetails = () => {
     return <div>Loading...</div>;
   }
 
+  const handleLike = (postId) => {
+    console.log(`Liked post with ID ${postId}`);
+  };
+
   return (
     <div className="post-details-container">
       <h2 className="post-title">{post.title}</h2>
@@ -92,6 +96,7 @@ const PostDetails = () => {
 
             <strong className="comment-name">{comment.name}</strong>: 
             <p className="comment-body">{comment.body}</p>
+            <button onClick={() => handleLike(post.id)}>Like</button>
           </div>
         ))}
       </div>

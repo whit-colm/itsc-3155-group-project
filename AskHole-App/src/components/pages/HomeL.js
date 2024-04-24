@@ -1,15 +1,15 @@
 import React, { useContext } from 'react';
-import Hero from '../Hero';
+import Posts from '../Posts';
 import Footer from '../Footer';
 
-function Home() {
+function HomeL() {
 
   return (
     <>
-      <Hero />
+      <Posts />
       <Footer />
     </>
   );
 }
 
-export default Home;
+export default HomeL;
