@@ -28,6 +28,7 @@ class UserManager(BaseUserManager):
         user = self.model(uid=uid, permissions=permissions, **extra_fields)
         user.set_password(password)
         user.is_superuser = True
+        user.is_staff = True
         user.save(using=self._db)
         return user
 
@@ -35,11 +36,20 @@ class User(AbstractBaseUser, PermissionsMixin):
     uid = models.CharField(max_length=255, unique=True, primary_key=True)
     displayname = models.CharField(max_length=255, blank=True, null=True)
     pronouns = models.CharField(max_length=50, blank=True, null=True)
-    permissions = models.IntegerField(default=0)  
+    permissions = models.IntegerField(default=1)  
     objects = UserManager()
     password = models.CharField(max_length=128, default=make_password(None))
     USERNAME_FIELD = 'uid'
     REQUIRED_FIELDS = []
+
+    # Stealing from those better than me.
+    # https://github.com/django/django/blob/c187f5f9242b681abaa199173e02066997439425/django/contrib/auth/models.py#L360C5-L364C6
+    is_staff = models.BooleanField(
+        default=False,
+    )
+
+    def __str__(self):
+        return self.uid
 
 
 class Tag(models.Model):
