@@ -14,11 +14,12 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-# from django.contrib import admin
-from django.http import JsonResponse
+from django.contrib import admin
 from django.urls import include, path
+
 from asapp import views
 
+from django.http import JsonResponse
 '''
 # Not used. left around just in case.
 def not_implemented(request, threadID=None, msgID=None, tag=None, reportID=None):
@@ -34,7 +35,7 @@ def not_implemented(request, threadID=None, msgID=None, tag=None, reportID=None)
 
 urlpatterns = [
     # This just, doesn't work. Probably for the best.
-    # path('admin/', admin.site.urls),
+    path('admin/', admin.site.urls),
 
     path('objs/profile/', views.get_user_profile, name='user_profile'),
     path('objs/tags/', views.get_all_tags, name='get_all_tags'),
@@ -54,6 +55,6 @@ urlpatterns = [
     path('thread/<uuid:threadID>/new/', not_implemented),
     path('thread/<uuid:threadID>/<uuid:msgID>/vote/', not_implemented),
 
-    path('auth/oauth2/', include('oauth2_provider.urls', namespace='oauth2_provider')),
+    path('auth/o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
     #path('auth/dummy, not_implemented)
 ]

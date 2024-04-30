@@ -16,6 +16,21 @@ class UserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
+
+    # TODO: DELETE THIS. DIRTY UGLY NO-GOOD VERY BAD BODGE.
+    # does the same thing as create_user, which IS used in prod. but
+    # sets superuser. this is for testing only and mother of hell
+    # should not be used in prod.
+    def create_superuser(self, uid, password=None, **extra_fields):
+        if not uid:
+            raise ValueError('The given UID must be set')
+        permissions = extra_fields.pop('permissions', 0)
+        user = self.model(uid=uid, permissions=permissions, **extra_fields)
+        user.set_password(password)
+        user.is_superuser = True
+        user.save(using=self._db)
+        return user
+
 class User(AbstractBaseUser, PermissionsMixin):
     uid = models.CharField(max_length=255, unique=True, primary_key=True)
     displayname = models.CharField(max_length=255, blank=True, null=True)
