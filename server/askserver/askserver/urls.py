@@ -14,9 +14,9 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.contrib import admin
+# from django.contrib import admin
 from django.http import JsonResponse
-from django.urls import path
+from django.urls import include, path
 from asapp import views
 
 '''
@@ -54,6 +54,6 @@ urlpatterns = [
     path('thread/<uuid:threadID>/new/', not_implemented),
     path('thread/<uuid:threadID>/<uuid:msgID>/vote/', not_implemented),
 
-    #path('auth/oauth2/login', views.oauth2_admin)
+    path('auth/oauth2/', include('oauth2_provider.urls', namespace='oauth2_provider')),
     #path('auth/dummy, not_implemented)
 ]
