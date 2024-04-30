@@ -17,7 +17,7 @@ Including another URLconf
 from django.contrib import admin
 from django.http import JsonResponse
 from django.urls import path
-from askserver import views
+from asapp import views
 
 '''
 # Not used. left around just in case.
@@ -33,7 +33,8 @@ def not_implemented(request, threadID=None, msgID=None, tag=None, reportID=None)
     return JsonResponse({"method":request.method, "threadID":threadID,"msgID":msgID,"tag":tag,"reportID":reportID}, safe=False, status=501)
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    # This just, doesn't work. Probably for the best.
+    # path('admin/', admin.site.urls),
 
     path('objs/profile/', views.get_user_profile, name='user_profile'),
     path('objs/tags/', views.get_all_tags, name='get_all_tags'),
@@ -52,4 +53,7 @@ urlpatterns = [
     path('thread/<uuid:threadID>/award/', not_implemented),
     path('thread/<uuid:threadID>/new/', not_implemented),
     path('thread/<uuid:threadID>/<uuid:msgID>/vote/', not_implemented),
+
+    #path('auth/oauth2/login', views.oauth2_admin)
+    #path('auth/dummy, not_implemented)
 ]

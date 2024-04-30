@@ -3,7 +3,7 @@ from django.core.paginator import Paginator
 from .models import Report
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required
-from askserver.models import User, Thread, Tag
+from asapp.models import User, Thread, Tag
 import base64
 
 

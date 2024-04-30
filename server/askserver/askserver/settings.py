@@ -33,7 +33,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
+    #'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -41,7 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework.authtoken',
-    'askserver',
+    'asapp',
 ]
 
 REST_FRAMEWORK = {
@@ -51,7 +51,7 @@ REST_FRAMEWORK = {
 }
 
 
-AUTH_USER_MODEL = 'askserver.User'
+AUTH_USER_MODEL = 'asapp.User'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
