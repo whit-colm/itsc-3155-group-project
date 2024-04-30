@@ -16,9 +16,26 @@ askserver-venv\bin\Activate.ps1
 
 ## Installing dependences:
 
-```
+```bash
 pip install django
 pip install djangorestframework
+```
+
+### Pip Problems
+
+If you get an error akin to:
+
+```
+Traceback (most recent call last):
+  File "/home/user/repos/itsc-3155-group-project/server/askserver-venv/bin/pip3", line 5, in <module>
+    from pip._internal.cli.main import main
+ModuleNotFoundError: No module named 'pip'
+```
+
+then run:
+
+```bash
+python3 -m ensurepip --upgrade
 ```
 
 ## Running the server

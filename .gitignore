@@ -188,3 +188,4 @@ server/askserver/.DS_Store
 server/.DS_Store
 server/.DS_Store
 .DS_Store
+server/askserver-venv/bin/pip3.12
