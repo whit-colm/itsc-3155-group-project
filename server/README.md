@@ -11,7 +11,7 @@ source askserver-venv/bin/activate
 Windows:
 
 ```powershell
-myworld\Scripts\activate.bat
+askserver-venv\bin\Activate.ps1
 ```
 
 ## Installing dependences:
