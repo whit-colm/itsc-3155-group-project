@@ -50,10 +50,10 @@ urlpatterns = [
 
     path('threads/', views.threads, name='threads'),
     path('threads/new/', views.threads_new, name='threads_new'),
-    path('thread/<uuid:threadID>/', not_implemented),
-    path('thread/<uuid:threadID>/award/', not_implemented),
-    path('thread/<uuid:threadID>/new/', not_implemented),
-    path('thread/<uuid:threadID>/<uuid:msgID>/vote/', not_implemented),
+    path('thread/<uuid:threadID>/', views.thread_PPARAM, name='thread_PPARAM'),
+    path('thread/<uuid:threadID>/award/', views.thread_PPARAM_award, name='thread_PPARAM_award'),
+    path('thread/<uuid:threadID>/new/', views.thread_PPARAM_new, name='thread_PPARAM_new'),
+    path('thread/<uuid:threadID>/<uuid:msgID>/vote/', views.thread_PPARAM_PPARAM_vote, name='thread_PPARAM_PPARAM_vote'),
 
     path('auth/o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
     #path('auth/dummy, not_implemented)

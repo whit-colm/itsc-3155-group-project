@@ -10,6 +10,7 @@ from rest_framework.response import Response
 from rest_framework import status
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def threads(request):
     
     offset = int(request.GET.get('offset', 0))
@@ -54,23 +55,28 @@ def threads(request):
 
     return JsonResponse({"threads": thread_list}, safe=False, status=200)
 
-
-
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def threads_new(request):
+    # Unmarhsal the data, and 400 if key fields are missing.
+    title = request.data.get('title') if request.data.get('title') else None
+    body = request.data.get('body') if request.data.get('body') else None
+    anonymous = request.data.get('anonymous', False)
+    tags = request.data.get('tags', [])
+    if not title or not body or not tags:
+        return JsonResponse({"message": "Missing required fields"}, status=status.HTTP_400_BAD_REQUEST)
+
+    # TODO: In a perfect world, we would have some kind of tool to make sure
+    #       a user isn't spamming POST. But I'm on a deadline
+    #       (if I could seriously get into this, I'd do it all in go anyway)
+
+    # Now we have to parse the data and commit it to the database
+    # if this fails, then we return a 400 if the client was stupid
+    # or a 500 if we were.
     try:
-        title = request.data.get('title') if request.data.get('title') else None
-        body = request.data.get('body') if request.data.get('body') else None
-        anonymous = request.data.get('anonymous', False)
-        tags = request.data.get('tags', [])
-
-        if not title or not body or not tags:
-            return JsonResponse({"message": "Missing required fields"}, status=status.HTTP_400_BAD_REQUEST)
-
         tag_objects = []
         for tag_name in tags:
-            tag, created = Tag.objects.get_or_create(name=tag_name)
+            tag, created = Tag.objects.get(name=tag_name)
             tag_objects.append(tag)
 
         thread_author = request.user if not anonymous else None
@@ -88,10 +94,19 @@ def threads_new(request):
             date=thread.date,
             question=True
         )
+    except Tag.DoesNotExist:
+        return JsonResponse({"message": "No such tag(s)"}, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        return JsonResponse({"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+    # The object has been successfully put into the DB, now we relay it to the user
+    # if something goes wrong here, we still want to send a 2XX as the tx *was*
+    # successful. It's just that for some reason there was a cock-up in 
+    # encoding the JSON.
+    try:
         thread_data = {
             "thread": {
-                "title": base64.b64encode(title.encode()).decode(),
+                "title": title,
                 "anonymous": anonymous,
                 "question": {
                     "id": str(message.id),
@@ -114,9 +129,30 @@ def threads_new(request):
                 "tags": [tag.name for tag in tag_objects]
             }
         }
-
         return JsonResponse(thread_data, status=status.HTTP_200_OK)
-
     except Exception as e:
-        return JsonResponse({"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return JsonResponse({"message": str(e)}, status=status.HTTP_201_CREATED)
 
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def thread_PPARAM(request):
+    return JsonResponse({"message": "What an asshole!"}, status=status.HTTP_501_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def thread_PPARAM_award(request):
+    return JsonResponse({"message": "What an asshole!"}, status=status.HTTP_501_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def thread_PPARAM_new(request):
+    return JsonResponse({"message": "What an asshole!"}, status=status.HTTP_501_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def thread_PPARAM_PPARAM_vote(request):
+    return JsonResponse({"message": "What an asshole!"}, status=status.HTTP_501_INTERNAL_SERVER_ERROR)
