@@ -6,6 +6,9 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, Permis
 from django.contrib.auth.hashers import make_password
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'askserver.settings')
 
+class Tag(models.Model):
+    name = models.CharField(max_length=100, unique=True, primary_key=True)
+
 class UserManager(BaseUserManager):
     def create_user(self, uid, password=None, **extra_fields):
         if not uid:
@@ -34,9 +37,10 @@ class UserManager(BaseUserManager):
 
 class User(AbstractBaseUser, PermissionsMixin):
     uid = models.CharField(max_length=255, unique=True, primary_key=True)
-    displayname = models.CharField(max_length=255, blank=True, null=True, default="")
-    pronouns = models.CharField(max_length=50, blank=True, null=True, default="")
+    displayname = models.CharField(max_length=255, blank=True, null=True)
+    pronouns = models.CharField(max_length=50, blank=True, null=True)
     permissions = models.IntegerField(default=1)  
+    tags = models.ManyToManyField(Tag, related_name='userTagSubscriptions')
     objects = UserManager()
     password = models.CharField(max_length=128, default=make_password(None))
     USERNAME_FIELD = 'uid'
@@ -50,10 +54,6 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.uid
-
-
-class Tag(models.Model):
-    name = models.CharField(max_length=100, unique=True)
 
 
 class Message(models.Model):

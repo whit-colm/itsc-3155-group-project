@@ -5,40 +5,40 @@ from django.utils import timezone
 from django.contrib.auth.decorators import login_required
 from asapp.models import User, Thread, Tag
 import base64
-
-
-@login_required
-def get_user_profile(request):
-    user = request.user
-    if user:
-        user_data = {
-            "uid": user.uid,
-            "displayname": base64.b64encode(user.displayname.encode()).decode() if user.displayname else "",
-            "pronouns": base64.b64encode(user.pronouns.encode()).decode() if user.pronouns else "",
-            "permissions": user.permissions,
-            "threads": [str(thread.id) for thread in Thread.objects.filter(author=user)],
-            "tags": [tag.name for tag in Tag.objects.filter(user=user)]  
-        }
-        return JsonResponse(user_data, safe=False, status=200)
-    else:
-        return JsonResponse({"message": "User not found"}, status=401)
-    
-
-from .models import Tag
-
-def get_all_tags(request):
-    tags = Tag.objects.all()
-    tag_list = [tag.name for tag in tags]
-    return JsonResponse({"tags": tag_list}, safe=False, status=200)
-
-
-
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from django.http import JsonResponse
 from .models import Tag
 from rest_framework import status
+
+
+#@login_required
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_user_profile(request):
+    try:
+        u = request.user
+        if u:
+            user_data = {
+                "uid": u.uid,
+                "displayname": u.displayname if u.displayname else "",
+                "pronouns": u.pronouns if u.pronouns else "",
+                "permissions": u.permissions,
+                "threads": [str(thread.id) for thread in Thread.objects.filter(author=u)],
+                "tags": [ tag for tag in u.tags.all()]
+            }
+            return JsonResponse(user_data, safe=False, status=200)
+        else:
+            return JsonResponse({"message": "User not found"}, status=401)
+    except Exception as e:
+        return JsonResponse({"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+def get_all_tags(request):
+    tags = Tag.objects.all()
+    tag_list = [tag.name for tag in tags]
+    return JsonResponse({"tags": tag_list}, safe=False, status=200)
+
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -291,6 +291,8 @@ def toggle_message_visibility(request, reportID):
         return JsonResponse({"id": reportID, "message": "Report not found"}, status=status.HTTP_404_NOT_FOUND)
     except ValueError:
         return JsonResponse({"message": "Invalid report ID"}, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
     
 
@@ -345,8 +347,8 @@ def get_threads(request):
 @permission_classes([IsAuthenticated])
 def create_thread(request):
     try:
-        title = base64.b64decode(request.data.get('title')).decode('utf-8') if request.data.get('title') else None
-        body = base64.b64decode(request.data.get('body')).decode('utf-8') if request.data.get('body') else None
+        title = request.data.get('title') if request.data.get('title') else None
+        body = request.data.get('body') if request.data.get('body') else None
         anonymous = request.data.get('anonymous', False)
         tags = request.data.get('tags', [])
 
@@ -403,5 +405,5 @@ def create_thread(request):
         return JsonResponse(thread_data, status=status.HTTP_200_OK)
 
     except Exception as e:
-        return JsonResponse({"message": "Error processing your request", "noapi": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        return JsonResponse({"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
