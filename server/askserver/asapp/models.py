@@ -34,8 +34,8 @@ class UserManager(BaseUserManager):
 
 class User(AbstractBaseUser, PermissionsMixin):
     uid = models.CharField(max_length=255, unique=True, primary_key=True)
-    displayname = models.CharField(max_length=255, blank=True, null=True)
-    pronouns = models.CharField(max_length=50, blank=True, null=True)
+    displayname = models.CharField(max_length=255, blank=True, null=True, default="")
+    pronouns = models.CharField(max_length=50, blank=True, null=True, default="")
     permissions = models.IntegerField(default=1)  
     objects = UserManager()
     password = models.CharField(max_length=128, default=make_password(None))
@@ -57,7 +57,6 @@ class Tag(models.Model):
 
 
 class Message(models.Model):
-    
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     thread = models.ForeignKey('Thread', related_name='messages', on_delete=models.CASCADE, null=True, blank=True)
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='messages')
@@ -65,6 +64,7 @@ class Message(models.Model):
     votes = models.IntegerField(null=True, blank=True, default=0)
     body = models.TextField()
     hidden = models.BooleanField(default=False)
+    question = models.BooleanField(default=False)
 
 
 class Thread(models.Model):

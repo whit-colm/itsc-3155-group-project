@@ -361,7 +361,8 @@ def create_thread(request):
         thread_author = request.user if not anonymous else None
         thread = Thread.objects.create(
             title=title,
-            author=thread_author
+            author=thread_author,
+            date=timezone.now()
         )
         thread.tags.set(tag_objects)
 
@@ -369,7 +370,8 @@ def create_thread(request):
             thread=thread,
             author=thread_author,
             body=body,
-            date=timezone.now()
+            date=thread.date,
+            question=True
         )
 
         thread_data = {
@@ -401,5 +403,5 @@ def create_thread(request):
         return JsonResponse(thread_data, status=status.HTTP_200_OK)
 
     except Exception as e:
-        return JsonResponse({"message": "Error processing your request"}, status=status.HTTP_400_BAD_REQUEST)
+        return JsonResponse({"message": "Error processing your request", "noapi": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
