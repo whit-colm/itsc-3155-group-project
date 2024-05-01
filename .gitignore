@@ -183,9 +183,7 @@ cython_debug/
 go.work
 server/askserver/askserver/migrations/0001_initial.py
 server/askserver/askserver/migrations/__init__.py
-server/.DS_Store
-server/askserver/.DS_Store
-server/.DS_Store
-server/.DS_Store
-.DS_Store
+
+*.DS_Store
+.vscode
 server/askserver-venv/bin/pip3.12
