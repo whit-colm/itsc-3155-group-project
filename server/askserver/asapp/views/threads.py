@@ -3,11 +3,21 @@ from django.core.paginator import Paginator
 from django.utils import timezone
 #from django.contrib.auth.decorators import login_required
 from asapp.models import User, Thread, Tag, Report, Message
-import base64, uuid
+import base64, uuid, hashlib
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.request import Request
 from rest_framework import status
+
+def anonymize_and_hide(jsonobject, user):
+    """Performs the necessary logic to redact information per-user
+    This anonimyzes the author in cases where the requester does not
+    have the privliges to de-anonymize them, and hides threads marked as
+    hidden.
+    """
+    jotype = jsonobject['_METADATA'] 
+
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -28,12 +38,17 @@ def threads(request):
     for thread in threads:
         last_interaction = thread.messages.filter(hidden=False).order_by('-date').first()
 
+        # Ugly edge case code if the last interaction was:
+        # 1. By the OP of the thread who
+        # 2. Posted anonymously and is being req'd by
+        # 3. A user who cannot de-anonymize
+        showAnonymous = ((last_interaction.author.uid == thread.author) and thread.anonymous and not request.user.permissions >> 2 )
         last_interaction_data = {
             "id": str(last_interaction.id),
             "author": {
-                "uid": last_interaction.author.uid,
-                "displayname": base64.b64encode(last_interaction.author.displayname.encode()).decode(),
-                "pronouns": base64.b64encode(last_interaction.author.pronouns.encode()).decode(),
+                "uid": last_interaction.author.uid if not showAnonymous else hashlib.sha3_224().update(last_interaction.author.uid),
+                "displayname": last_interaction.author.displayname,
+                "pronouns": last_interaction.author.pronouns
             },
             "date": last_interaction.date.timestamp(),
             "bodyshort": base64.b64encode(last_interaction.body[:32].encode()).decode(),
@@ -53,17 +68,19 @@ def threads(request):
             "lastinteraction": last_interaction_data
         })
 
-    return JsonResponse({"threads": thread_list}, safe=False, status=200)
+    return JsonResponse({"threads": thread_list}, safe=False, status=status.HTTP_200_OK)
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def threads_new(request):
+    print(request.data)
     # Unmarhsal the data, and 400 if key fields are missing.
-    title = request.data.get('title') if request.data.get('title') else None
-    body = request.data.get('body') if request.data.get('body') else None
-    anonymous = request.data.get('anonymous', False)
-    tags = request.data.get('tags', [])
-    if not title or not body or not tags:
+    t = request.data.get('title')
+    b = request.data.get('body')
+    a = request.data.get('anonymous', False)
+    # Tags still need to be checked if in-db. No custom tags.
+    g_candidates = request.data.get('tags', [])
+    if not t or not b or not g_candidates:
         return JsonResponse({"message": "Missing required fields"}, status=status.HTTP_400_BAD_REQUEST)
 
     # TODO: In a perfect world, we would have some kind of tool to make sure
@@ -74,24 +91,26 @@ def threads_new(request):
     # if this fails, then we return a 400 if the client was stupid
     # or a 500 if we were.
     try:
-        tag_objects = []
-        for tag_name in tags:
-            tag, created = Tag.objects.get(name=tag_name)
-            tag_objects.append(tag)
+        g = []
+        for tag_name in g_candidates:
+            tag = Tag.objects.get(name=tag_name)
+            g.append(tag)
 
-        thread_author = request.user if not anonymous else None
+        # The only vital things to a Thread is title, anonymous, and tags
+        # the rest is determined by the Message with the question bit set
         thread = Thread.objects.create(
-            title=title,
-            author=thread_author,
-            date=timezone.now()
+            title=t,
+            anonymous=a,
         )
-        thread.tags.set(tag_objects)
+        thread.tags.set(g)
 
+        # All other fields which a thread may have are, in fact, simply
+        # attributes of the Message where question=True.
         message = Message.objects.create(
             thread=thread,
-            author=thread_author,
-            body=body,
-            date=thread.date,
+            author=request.user,
+            body=b,
+            date=timezone.now(),
             question=True
         )
     except Tag.DoesNotExist:
@@ -104,32 +123,7 @@ def threads_new(request):
     # successful. It's just that for some reason there was a cock-up in 
     # encoding the JSON.
     try:
-        thread_data = {
-            "thread": {
-                "title": title,
-                "anonymous": anonymous,
-                "question": {
-                    "id": str(message.id),
-                    "threadID": str(thread.id),
-                    "author": {
-                        "uid": request.user.uid if not anonymous else "anonymous",
-                        "displayname": base64.b64encode(request.user.displayname.encode()).decode() if not anonymous else "anonymous",
-                        "pronouns": base64.b64encode(request.user.pronouns.encode()).decode() if not anonymous else ""
-                    },
-                    "date": int(message.date.timestamp()),
-                    "votes": 0,
-                    "reply": None,
-                    "content": base64.b64encode(body.encode()).decode(),
-                    "hidden": False
-                },
-                "responses": [],
-                "communityAward": None,
-                "authorAward": None,
-                "instructorAward": None,
-                "tags": [tag.name for tag in tag_objects]
-            }
-        }
-        return JsonResponse(thread_data, status=status.HTTP_200_OK)
+        return JsonResponse(thread.as_api(), status=status.HTTP_200_OK)
     except Exception as e:
         return JsonResponse({"message": str(e)}, status=status.HTTP_201_CREATED)
 

@@ -45,8 +45,7 @@ def objs_tags(request):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def objs_tags_new(request):
-    
-    if request.user.permissions < 4:
+    if not request.user.permissions >> 2:
         return JsonResponse({"permission": 4, "message": "Insufficient permissions"}, status=status.HTTP_403_FORBIDDEN)
 
     try:
@@ -68,7 +67,7 @@ def objs_tags_new(request):
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
 def objs_tags_PPARAM(request, tag):
-    if request.user.permissions >> 2:
+    if not request.user.permissions >> 2:
         return JsonResponse({"permission": 4, "message": "Insufficient permissions"}, status=status.HTTP_403_FORBIDDEN)
 
     try:
