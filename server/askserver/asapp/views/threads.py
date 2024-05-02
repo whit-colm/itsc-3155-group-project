@@ -10,13 +10,100 @@ from rest_framework.response import Response
 from rest_framework.request import Request
 from rest_framework import status
 
-def anonymize_and_hide(jsonobject, user):
-    """Performs the necessary logic to redact information per-user
+def anonymize_and_hide(jsonobject: dict, user: User, messageThreadAnonymous=None, messageThreadOP=None):
+    """
+    Performs the necessary logic to redact information per-user
+    
     This anonimyzes the author in cases where the requester does not
     have the privliges to de-anonymize them, and hides threads marked as
     hidden.
+
+    Parameters
+    ----------
+    jsonobject
+        The JSON being operated on. It should have a `_METADATA` key or else it will raise a KeyError
+    user
+        The User to censure for, checking permissions and identity.
+    messageThreadAnonymous : bool, optional
+        Set to true or false if the thread a given message belongs to was done anonymously.
+        This is a small optimization to save unecessary calls to the DB. Do not use it unless you know what you are doing.
+    messageThreadOP : optional
+        The UID of the OP of the thread a message belongs to.
+        This is a small optimization to save unecessary calls to the DB. Do not use it unless you know what you are doing.
+
+    Returns
+    -------
+    result
+        The censured JSON.
+
+    Raises
+    ------
+    KeyError
+        If the `_METADATA` wasn't understood or was empty.
+    
     """
-    jotype = jsonobject['_METADATA'] 
+    # This is how we can make sure the correct operations are done
+    jotype = jsonobject.get('_METADATA', {})
+    user_permissions = user.permissions
+    user_uid = user.uid
+
+    if jotype == "message.askhole.api.dotfile.sh/v1alpha1":
+        # Message anonimyzes:
+        # - Author UID -> sha3_224(UID)
+        # - Author displayname -> None
+        # - Author pronouns -> dGhleS90aGVt
+        # Message hides:
+        # - Author UID -> HiddenMessageUser
+        # - Author displayname -> None
+        # - Author pronouns -> None
+        # - Message body -> None
+        # - Message votes -> None
+
+        # Figure out if the thread was posted anonymously
+        thread_anonymous = messageThreadAnonymous if messageThreadAnonymous is not None else Thread.objects.get(id=jsonobject['threadID']).anonymous
+        # Figure out the author of the thread
+        thread_author = messageThreadOP if messageThreadOP is not None else Thread.objects.get(id=jsonobject['threadID']).author.uid
+
+        # match all 3 conditions:
+        # 1. the thread was submitted anonymously
+        # 2. the user does not have sufficient perms to de-anonymize
+        # 3. the user is not the OP of the thread
+        if (thread_anonymous and not int( user.permissions >> 2) and (thread_author != user.uid)):
+            jsonobject['author'].pop('displayname', None)
+            jsonobject['author']['pronouns'] = "dGhleS90aGVt"
+            a_uid = jsonobject['author']['uid']
+            a_uid = hashlib.sha3_224(a_uid.encode()).hexdigest()
+            jsonobject['author']['uid'] = f"sha3-224:{a_uid}"
+        
+        # Match all 3 conditions:
+        # 1. the message is set hidden
+        # 2. The user does not have sufficient perms to unhide
+        # 3. the user is not the OP of the message
+        message_hidden = jsonobject.get('hidden', False)
+        # We use dictionary notation here as we need it to fail if there's no author.
+        message_author = jsonobject['author']['uid']
+
+        if (message_hidden and not int(user.permissions >> 1) and (message_author != user.uid)):
+            jsonobject['author']['uid'] = "HiddenMessageUser"
+            jsonobject['author'].pop('displayname', None)
+            jsonobject['author'].pop('pronouns', None)
+
+        return jsonobject
+
+
+    elif jotype == "thread.askhole.api.dotfile.sh/v1alpha1":
+        return jsonobject
+
+    elif jotype == "threadsummary.askhole.api.dotfile.sh/v1alpha1":
+        return jsonobject
+
+    # If the passed object was none of these, then something has gone wrong.    
+    else:
+        if jotype is None:
+            raise KeyError("No metadata was found for the JSON.")
+        else:
+            raise KeyError(f"Cannot anonimyze JSON object of metadata type `{jotype}`.")
+
 
 
 @api_view(['GET'])
@@ -131,22 +218,22 @@ def threads_new(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def thread_PPARAM(request):
-    return JsonResponse({"message": "What an asshole!"}, status=status.HTTP_501_INTERNAL_SERVER_ERROR)
+    return JsonResponse({"message": "What an asshole!"}, status=status.HTTP_501_NOT_IMPLEMENTED)
 
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def thread_PPARAM_award(request):
-    return JsonResponse({"message": "What an asshole!"}, status=status.HTTP_501_INTERNAL_SERVER_ERROR)
+    return JsonResponse({"message": "What an asshole!"}, status=status.HTTP_501_NOT_IMPLEMENTED)
 
 
-@api_view(['GET'])
+@api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def thread_PPARAM_new(request):
-    return JsonResponse({"message": "What an asshole!"}, status=status.HTTP_501_INTERNAL_SERVER_ERROR)
+    return JsonResponse({"message": "What an asshole!"}, status=status.HTTP_501_NOT_IMPLEMENTED)
 
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def thread_PPARAM_PPARAM_vote(request):
-    return JsonResponse({"message": "What an asshole!"}, status=status.HTTP_501_INTERNAL_SERVER_ERROR)
+    return JsonResponse({"message": "What an asshole!"}, status=status.HTTP_501_NOT_IMPLEMENTED)
