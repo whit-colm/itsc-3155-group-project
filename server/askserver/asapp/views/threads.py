@@ -36,7 +36,7 @@ def anonymize_and_hide(jsonobject: dict, user: User, messageThreadAnonymous=None
     Returns
     -------
     result
-        The censured JSON.
+        The censored JSON.
 
     Raises
     ------
@@ -66,11 +66,12 @@ def anonymize_and_hide(jsonobject: dict, user: User, messageThreadAnonymous=None
         # Figure out the author of the thread
         thread_author = messageThreadOP if messageThreadOP is not None else Thread.objects.get(id=jsonobject['threadID']).author.uid
 
-        # match all 3 conditions:
+        # match all 4 conditions:
         # 1. the thread was submitted anonymously
         # 2. the user does not have sufficient perms to de-anonymize
         # 3. the user is not the OP of the thread
-        if (thread_anonymous and not user.permissions >> 2 and (thread_author != user.uid)):
+        # 4. the message is from the OP of the thread
+        if (thread_anonymous and not user.permissions >> 2 and (thread_author != user.uid) and thread_author == jsonobject['author']['uid']):
             jsonobject['author'].pop('displayname', None)
             jsonobject['author']['pronouns'] = "dGhleS90aGVt"
             a_uid = jsonobject['author']['uid']
@@ -89,6 +90,9 @@ def anonymize_and_hide(jsonobject: dict, user: User, messageThreadAnonymous=None
             jsonobject['author']['uid'] = "HiddenMessageUser"
             jsonobject['author'].pop('displayname', None)
             jsonobject['author'].pop('pronouns', None)
+            jsonobject['body'] = ""
+            jsonobject.pop('votes', None)
+            jsonobject.pop('reply', None)
 
         return jsonobject
 
@@ -184,12 +188,12 @@ def threads(request):
         last_interaction = thread.messages.filter(question=False).filter(hidden=False).order_by('-date').first()
 
         # Now we have to do some weird hacky thing to get the shortened body
-        t_bodyshort = base64.urlsafe_b64decode(thread.question_message.body)[:64].decode('utf-8')
+        t_bodyshort = base64.urlsafe_b64decode(thread.question_message.body).decode('utf-8')[:64]
         t_bodyshort = base64.urlsafe_b64encode(t_bodyshort.encode('utf-8')).decode('utf-8')
 
         last_interaction_data = None
         if last_interaction:
-            l_bodyshort = base64.urlsafe_b64decode(last_interaction.body)[:32].decode('utf-8')
+            l_bodyshort = base64.urlsafe_b64decode(last_interaction.body).decode('utf-8')[:32]
             l_bodyshort = base64.urlsafe_b64encode(l_bodyshort.encode('utf-8')).decode('utf-8')
 
             last_interaction_data = {
@@ -333,10 +337,15 @@ def thread_PPARAM_award(request, threadID):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def thread_PPARAM_new(request, threadID):
+    # first check to make sure base64. This is as close as I get to db santization
+    # if it's not, scream at user.
+
 
     # First do a check to make sure the reply is valid
     try:
-        reply_msg = Message.objects.get(id=request.data.get('reply'))
+        reply_msg = None
+        if request.data.get('reply', None) is not None:
+            reply_msg = Message.objects.get(id=request.data.get('reply')) if not Message.objects.get(id=request.data.get('reply')).question else None
     except Message.DoesNotExist:
         return JsonResponse({"error": "InvalidMessage", "uuid": request.data.get('reply')}, status=status.HTTP_404_NOT_FOUND)
     except KeyError:
@@ -350,7 +359,7 @@ def thread_PPARAM_new(request, threadID):
                 author=request.user,
                 body=request.data.get('body'),
                 date=timezone.now(),
-                reply=reply_msg
+                reply=reply_msg 
             )
     except Thread.DoesNotExist:
         return JsonResponse({"error": "InvalidThread", "uuid": str(threadID)}, status=status.HTTP_404_NOT_FOUND)

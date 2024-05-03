@@ -24,7 +24,7 @@ def objs_profile(request):
                 "displayname": u.displayname if u.displayname else "",
                 "pronouns": u.pronouns if u.pronouns else "",
                 "permissions": u.permissions,
-                "threads": [str(thread.id) for thread in Thread.objects.filter(author=u)],
+                "threads": list(Thread.objects.filter(messages__author=u, messages__question=True).values_list('id', flat=True)),
                 "tags": [ tag for tag in u.tags.all()]
             }
             return JsonResponse(user_data, safe=False, status=200)

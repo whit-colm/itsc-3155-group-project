@@ -105,7 +105,7 @@ class Message(models.Model):
             },
             "date": int(self.date.timestamp()),
             "votes": self.votes,
-            "reply": str(self.reply),
+            "reply": str(self.reply) if self.reply is not None else None,
             "body": self.body,
             "hidden": self.hidden,
             "question": self.question
@@ -116,7 +116,7 @@ class Message(models.Model):
     # This question is set, in application logic, at the creation of the thread.
     class Meta:
         constraints = [
-            UniqueConstraint(name='question_message', fields=['question'], condition=models.Q(question=True))
+            UniqueConstraint(name='question_message', fields=['thread', 'question'], condition=models.Q(question=True))
         ]
 
 class Thread(models.Model):
@@ -159,6 +159,7 @@ class Thread(models.Model):
         Warning: This does not anonymize."""
         return {
             "_METADATA": "thread.askhole.api.dotfile.sh/v1alpha1",
+            "id": str(self),
             "title": self.title,
             "anonymous": self.anonymous,
             "question": self.question_message.as_api(),
