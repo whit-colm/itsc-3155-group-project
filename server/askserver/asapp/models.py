@@ -11,7 +11,6 @@ class Tag(models.Model):
     name = models.CharField(max_length=100, unique=True, primary_key=True)
     def __str__(self):
         return self.name
-    
 
 class UserManager(BaseUserManager):
     def create_user(self, uid, password=None, **extra_fields):
@@ -73,11 +72,15 @@ class Message(models.Model):
     thread = models.ForeignKey('Thread', related_name='messages', on_delete=models.CASCADE, null=False, blank=False, db_index=True)
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='messages')
     date = models.DateTimeField()
-    votes = models.IntegerField(default=0, null=0)
+    voters = models.ManyToManyField(User, related_name='user_votes')
     reply = models.ForeignKey('self', related_name='replies', on_delete=models.SET_NULL, null=True, blank=True)
     body = models.TextField()
     hidden = models.BooleanField(default=False)
     question = models.BooleanField(default=False, null=False)
+
+    @property
+    def votes(self):
+        return self.voters.all().count()
 
     def __str__(self):
         """Messages as strings will be represented by their UUID.
@@ -160,9 +163,9 @@ class Thread(models.Model):
             "anonymous": self.anonymous,
             "question": self.question_message.as_api(),
             "responses": [r.as_api() for r in self.responses],
-            "communityAward": self.communityaward,
-            "authorAward": self.authoraward,
-            "instructorAward": self.instructoraward,
+            "communityAward": str(self.communityaward),
+            "authorAward": str(self.authoraward),
+            "instructorAward": str(self.instructoraward),
             "tags": list(self.tags.values_list('name', flat=True))
         }
 
