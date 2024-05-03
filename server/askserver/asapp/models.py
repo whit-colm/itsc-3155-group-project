@@ -70,8 +70,8 @@ class User(AbstractBaseUser, PermissionsMixin):
 class Message(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     thread = models.ForeignKey('Thread', related_name='messages', on_delete=models.CASCADE, null=False, blank=False, db_index=True)
-    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='messages')
-    date = models.DateTimeField()
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='authors')
+    date = models.DateTimeField(db_index=True)
     voters = models.ManyToManyField(User, related_name='user_votes')
     reply = models.ForeignKey('self', related_name='replies', on_delete=models.SET_NULL, null=True, blank=True)
     body = models.TextField()
