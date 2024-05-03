@@ -332,11 +332,17 @@ def thread_PPARAM_PPARAM_vote(request, threadID, msgID):
     except Exception as e:
         return JsonResponse({"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-    # Check if vote
-        # if voted already, do nothing and return 0
-        # otherwise, add user to message-votey-table-thingey and return 1
-    # else
-        # if voted already, remove user from manytomany and return -1
-        # otherwise, do nothing and return 0.
+    if will_vote:
+        if voted:
+            return JsonResponse({"delta": 0}, status=status.HTTP_200_OK)
+        else:
+            msg.voters.add(request.user)
+            return JsonResponse({"delta": 1}, status=status.HTTP_200_OK)
+    else:
+        if voted:
+            msg.voters.remove(request.user)
+            return JsonResponse({"delta": -1}, status=status.HTTP_200_OK)
+        else:
+            return JsonResponse({"delta": 0}, status=status.HTTP_200_OK)
 
     return JsonResponse({"message": "What an asshole!"}, status=status.HTTP_501_NOT_IMPLEMENTED)
