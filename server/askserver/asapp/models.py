@@ -2,12 +2,18 @@ from django.db import models
 from django.db.models import UniqueConstraint
 from django.db.models.query import QuerySet
 from django.conf import settings
-import uuid, os, datetime
+from django.utils import timezone
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.contrib.auth.hashers import make_password
+import uuid, os, datetime
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'askserver.settings')
 
 class Tag(models.Model):
+    name = models.CharField(max_length=100, unique=True, primary_key=True)
+    def __str__(self):
+        return self.name
+
+class ReportTag(models.Model):
     name = models.CharField(max_length=100, unique=True, primary_key=True)
     def __str__(self):
         return self.name
@@ -71,10 +77,10 @@ class Message(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     thread = models.ForeignKey('Thread', related_name='messages', on_delete=models.CASCADE, null=False, blank=False, db_index=True)
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='authors')
-    date = models.DateTimeField(db_index=True)
+    date = models.DateTimeField(default=timezone.now, db_index=True)
     voters = models.ManyToManyField(User, related_name='user_votes')
     reply = models.ForeignKey('self', related_name='replies', on_delete=models.SET_NULL, null=True, blank=True)
-    body = models.TextField()
+    body = models.TextField(default="", null="")
     hidden = models.BooleanField(default=False)
     question = models.BooleanField(default=False, null=False)
 
@@ -174,9 +180,12 @@ class Thread(models.Model):
 
 class Report(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    message = models.ForeignKey(Message, on_delete=models.CASCADE)
-    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    date = models.DateTimeField()
-    reason = models.TextField()
+    message = models.ForeignKey(Message, on_delete=models.SET(Message.dead())),
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET(User.dead()))
+    date = models.DateTimeField(default=timezone.now, db_index=True)
+    reason =  models.ManyToManyField(ReportTag, related_name='reports')
     comment = models.TextField(null=True, blank=True)
 
+    def __str__(self):
+        return str(self.id)
+    
