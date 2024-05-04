@@ -1,6 +1,6 @@
 from django.utils import timezone
 from django.test import TestCase
-from askserver.models import Thread, Message, Tag, Report, User
+from asapp.models import Thread, Message, Tag, Report, User
 
 class APITestCase(TestCase):
     def setUp(self):

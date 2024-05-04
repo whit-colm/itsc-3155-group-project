@@ -1,5 +1,5 @@
 from django.utils import timezone
-from askserver.models import User, Tag, Thread, Message, Report
+from asapp.models import User, Tag, Thread, Message, Report
 import uuid
 
 users = [

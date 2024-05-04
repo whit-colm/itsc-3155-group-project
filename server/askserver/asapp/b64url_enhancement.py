@@ -21,7 +21,7 @@ def check_base64(text: str) -> bool:
     try:
         d = b64url_decode_str(text)
         e = b64url_encode_str(d)
-        if e != text:
+        if e != text.strip('='):
             return False
         return True
     except (binascii.Error, UnicodeDecodeError):
@@ -42,7 +42,14 @@ def b64url_encode_str(text: str) -> str:
     -------
     s : str
         The encoded string.
+
+    Raises
+    ------
+    TypeError
+        If something that is not a string was passed
     """
+    if type(text) != str:
+        raise TypeError(f"Expected `str`, got {type(text)}")
     b_encoded = text.encode('utf-8')
     b_decoded = urlsafe_b64encode(b_encoded).strip(b"=").decode('utf-8')
     return b_decoded
@@ -59,8 +66,16 @@ def b64url_decode_str(text: str) -> str:
     -------
     s : str
         The decoded string.
+
+    Raises
+    ------
+    TypeError
+        If something that is not a string was passed
     """
-    b_encoded = text.encode('utf-8')
+    if type(text) != str:
+        raise TypeError(f"Expected `str`, got {type(text)}")
+    
+    b_encoded = text.strip("=").encode('utf-8')
     b_decoded = urlsafe_b64decode(
         (b_encoded+(b"="*(4-(len(b_encoded)%4))))
     ).decode('utf-8')
