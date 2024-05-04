@@ -8,7 +8,7 @@ from rest_framework.authtoken.models import Token
 
 class TestTag(TestCase):
     def setUp(self):
-        self.tag = Tag.objects.create("Python")
+        self.tag = Tag.objects.create(name="Python")
 
     def test_create_duplicates(self):
         pass
@@ -25,20 +25,20 @@ class TestUser(TestCase):
         self.uid = 'myuid'
         self.user   = User.objects.create_user(uid=self.uid,
             password='insecurePassword', permissions=4)
-        self.user = Token.objects.create(user=self.user)
+        self.user_token = Token.objects.create(user=self.user)
         self.user.displayname = 'TWVpbGkgV2FuZyAo546L576O5Li9KQ'
         self.user.pronouns = 'emllL2hpcg'
         
         self.tag = Tag.objects.create(name="Python")
 
     def test_render_str(self):
-        assertEqual(self.uid, str(self.user))
+        self.assertEqual(self.uid, str(self.user))
 
     def test_created_thread(self):
         self.thread = Thread.objects.create(
             title=b64url_encode_str("Test Thread"), 
-            tags=["Python"]
         )
+        self.thread.tags.set(["Python"])
 
         Message.objects.create(
             author=self.user,
@@ -79,8 +79,8 @@ class TestThread(TestCase):
             id=self.uuid,
             title=b64url_encode_str("Test Thread"),
             anonymous=False,
-            tags=["Python"]
         )
+        self.thread.tags.set(["Python"])
 
         Message.objects.create(
             author=self.user,
@@ -168,8 +168,8 @@ class TestMessage(TestCase):
 
         self.thread = Thread.objects.create(
             title=b64url_encode_str("Test Thread"), 
-            tags=["Python"]
         )
+        self.thread.tags.set(["Python"])
 
         Message.objects.create(
             author=self.user_regular,
@@ -239,8 +239,8 @@ class TestReport(TestCase):
 
         self.thread = Thread.objects.create(
             title=b64url_encode_str("Test Thread"), 
-            tags=["Python"]
         )
+        self.thread.tags.set(["Python"])
 
         Message.objects.create(
             author=self.user_regular,

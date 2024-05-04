@@ -95,7 +95,7 @@ class Message(models.Model):
 
     def dead():
         # weird special case for deleted messages which shouldn't cascade.
-        return Message.objects.get_or_create(id=uuid.UUID(int = 0), author=User.dead())
+        return Message.objects.get_or_create(id=uuid.UUID(int = 0), author=User.dead)
 
     def as_api(self):
         return {
@@ -177,11 +177,10 @@ class Thread(models.Model):
         }
 
 
-
 class Report(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    message = models.ForeignKey(Message, on_delete=models.SET(Message.dead())),
-    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET(User.dead()))
+    message = models.ForeignKey(Message, on_delete=models.SET(Message.dead)),
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET(User.dead))
     date = models.DateTimeField(default=timezone.now, db_index=True)
     reason =  models.ManyToManyField(ReportTag, related_name='reports')
     comment = models.TextField(null=True, blank=True)
