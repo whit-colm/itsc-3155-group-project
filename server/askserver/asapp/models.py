@@ -72,6 +72,14 @@ class User(AbstractBaseUser, PermissionsMixin):
         """
         return self.uid
 
+    def as_author_api(self):
+        return {
+            "_METADATA": "author.user.askhole.api.dotfile.sh/v1alpha1",
+            "uid": str(self),
+            "displayname": self.displayname,
+            "pronouns": self.pronouns
+        }
+
 
 class Message(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -102,13 +110,7 @@ class Message(models.Model):
             "_METADATA": "message.askhole.api.dotfile.sh/v1alpha1",
             "id": str(self),
             "threadID": str(self.thread),
-            # The first time, skip anonymous logic. It will never be anonymous anyway
-            # as the author can always de-anonymize themself.
-            "author": {
-                "uid": str(self.author),
-                "displayname": self.author.displayname,
-                "pronouns": self.author.pronouns
-            },
+            "author": self.author.as_author_api(),
             "date": int(self.date.timestamp()),
             "votes": self.votes,
             "reply": str(self.reply) if self.reply is not None else None,
@@ -176,10 +178,9 @@ class Thread(models.Model):
             "tags": list(self.tags.values_list('name', flat=True))
         }
 
-
 class Report(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    message = models.ForeignKey(Message, on_delete=models.SET(Message.dead)),
+    message = models.ForeignKey(Message, related_name='reported_msgs', on_delete=models.SET(Message.dead), null=False, blank=False)
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET(User.dead))
     date = models.DateTimeField(default=timezone.now, db_index=True)
     reason =  models.ManyToManyField(ReportTag, related_name='reports')
@@ -187,4 +188,16 @@ class Report(models.Model):
 
     def __str__(self):
         return str(self.id)
+
+    def as_api(self):
+        return {
+            "_METADATA": "report.askhole.api.dotfile.sh/v1alpha1",
+            "id": str(self),
+            "message": self.message.as_api(),
+            "author": self.author.as_author_api(),
+            "date": int(self.date.timestamp()),
+            "reason": list(self.reason.values_list('name', flat=True)),
+            "comment": self.comment
+        }
+
     

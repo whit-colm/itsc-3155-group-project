@@ -2,12 +2,13 @@ from django.http import JsonResponse
 from django.core.paginator import Paginator
 from django.utils import timezone
 #from django.contrib.auth.decorators import login_required
-from asapp.models import User, Thread, Tag, Report, Message
+from asapp.models import User, Thread, Tag, Report, Message, ReportTag
 import base64, uuid
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
+from asapp.b64url_enhancement import check_base64
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -60,64 +61,45 @@ def reports(request):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def reports_new(request):
+    data = request.data
+    message_id = data.get('messageID')
+    reasons = data.get('reason')
+    comment = data.get('comment', '')
+
+    if not message_id or not reasons:
+        return JsonResponse({"message": "Required fields 'messageID' or 'reason' missing"}, status=status.HTTP_400_BAD_REQUEST)
+    
     try:
-        data = request.data
-        message_id = data.get('messageID')
-        reasons = data.get('reason')
-        comment = data.get('comment', '')
+        r_msg = Message.objects.get(id=message_id)
+    except Message.DoesNotExist:
+        return JsonResponse({"message": "Message not found"}, status=status.HTTP_404_NOT_FOUND)
 
-        if not message_id or not reasons:
-            return JsonResponse({"message": "Required fields 'messageID' or 'reason' missing"}, status=status.HTTP_400_BAD_REQUEST)
+    try:
+        filtered_reasons = []
+        for reason in reasons:
+            rt = ReportTag.objects.get(name=reason)
+            filtered_reasons.append(rt)
+    except ReportTag.DoesNotExist:
+        return JsonResponse({"message": "Report tag is invalid"}, status=status.HTTP_400_BAD_REQUEST)
+    
+    c = None
+    if comment and check_base64(comment):
+        c = comment
+    elif comment and not check_base64(comment):
+        return JsonResponse({"message": "Malformed comment base64"}, status=status.HTTP_400_BAD_REQUEST)
 
-        
-        try:
-            message = Message.objects.get(id=uuid.UUID(message_id))
-        except Message.DoesNotExist:
-            return JsonResponse({"message": "Message not found"}, status=status.HTTP_404_NOT_FOUND)
+    report = Report.objects.create(
+        message=r_msg,
+        author=request.user,
+        comment=c
+    )
+    report.reason.set(filtered_reasons)
 
-        
-        if comment:
-            comment = base64.b64decode(comment).decode('utf-8')
-
-        
-        report = Report.objects.create(
-            message=message,
-            author=request.user,  
-            date=timezone.now(),
-            reason=','.join(reasons),  
-            comment=comment
-        )
-
-        report_data = {
-            "id": str(report.id),
-            "message": {
-                "id": str(message.id),
-                "threadID": str(message.thread.id),
-                "author": {
-                    "uid": message.author.uid,
-                    "displayname": message.author.displayname,
-                    "pronouns": message.author.pronouns
-                },
-                "date": int(message.date.timestamp()),
-                "votes": message.votes,
-                "reply": None,
-                "content": message.body,
-                "hidden": message.hidden
-            },
-            "author": {
-                "uid": request.user.uid,
-                "displayname": request.user.displayname,
-                "pronouns": request.user.pronouns
-            },
-            "date": int(report.date.timestamp()),
-            "reason": reasons,
-            "comment": comment
-        }
-
-        return JsonResponse({"report": report_data}, status=status.HTTP_200_OK)
+    try:
+        return JsonResponse({"report": report.as_api()}, status=status.HTTP_200_OK)
 
     except Exception as e:
-        return JsonResponse({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        return JsonResponse({"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
 
 @api_view(['GET'])
