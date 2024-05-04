@@ -3,7 +3,7 @@ from django.core.paginator import Paginator
 from django.utils import timezone
 #from django.contrib.auth.decorators import login_required
 from asapp.models import User, Thread, Tag, Report, Message
-import base64, uuid, hashlib, binascii
+import hashlib
 from rest_framework.decorators import api_view, permission_classes
 from django.db import models
 from django.db.models import Max, Q
