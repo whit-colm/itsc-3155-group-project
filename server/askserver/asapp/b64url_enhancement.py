@@ -47,6 +47,8 @@ def b64url_encode_str(text: str) -> str:
     ------
     TypeError
         If something that is not a string was passed
+    binascii.Error, UnicodeDecodeError
+        If passed a string, but not a base64 one.
     """
     if type(text) != str:
         raise TypeError(f"Expected `str`, got {type(text)}")
@@ -71,6 +73,8 @@ def b64url_decode_str(text: str) -> str:
     ------
     TypeError
         If something that is not a string was passed
+    binascii.Error, UnicodeDecodeError
+        If passed a string, but not a base64 one.
     """
     if type(text) != str:
         raise TypeError(f"Expected `str`, got {type(text)}")
