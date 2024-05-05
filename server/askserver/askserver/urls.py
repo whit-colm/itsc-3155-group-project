@@ -45,8 +45,8 @@ urlpatterns = [
 
     path('reports/', views.reports, name='reports'),
     path('reports/new/', views.reports_new, name='reports_new'),
-    path('report/<uuid:reportID>/', views.reports_PPARAM, name='reports_PPARAM'),
-    path('report/<uuid:reportID>/hide/', views.reports_PPARAM_hide, name='reports_PPARAM_hide'),
+    path('report/<uuid:reportID>/', views.report_PPARAM, name='reports_PPARAM'),
+    path('report/<uuid:reportID>/hide/', views.report_PPARAM_hide, name='reports_PPARAM_hide'),
 
     path('threads/', views.threads, name='threads'),
     path('threads/new/', views.threads_new, name='threads_new'),

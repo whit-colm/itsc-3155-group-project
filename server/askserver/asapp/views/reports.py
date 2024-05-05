@@ -82,42 +82,17 @@ def reports_new(request):
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
-def reports_PPARAM(request, reportID):
+def report_PPARAM(request, reportID):
     
-    if request.user.permissions >> 2:
+    if not request.user.permissions >> 2:
         return JsonResponse({"permission": 4, "message": "Insufficient permissions"}, status=status.HTTP_403_FORBIDDEN)
 
     try:
         
         uuid.UUID(reportID)
-        report = Report.objects.get(id=reportID)
-        
-        report_data = {
-            "id": str(report.id),
-            "message": {
-                "id": str(report.message.id),
-                "threadID": str(report.message.thread.id),
-                "author": {
-                    "uid": report.message.author.uid,
-                    "displayname": report.message.author.displayname,
-                    "pronouns": report.message.author.pronouns
-                },
-                "date": int(report.message.date.timestamp()),
-                "votes": report.message.votes,
-                "reply": None,
-                "content": report.message.body,
-                "hidden": report.message.hidden
-            },
-            "author": {
-                "uid": report.author.uid,
-                "displayname": report.author.displayname,
-                "pronouns": report.author.pronouns
-            },
-            "date": int(report.date.timestamp()),
-            "reason": report.reason.split(','),
-            "comment": report.comment
-        }
-        return JsonResponse({"report": report_data}, status=status.HTTP_200_OK)
+        report = Report.objects.get(id=reportID).as_api()
+
+        return JsonResponse({"report": report}, status=status.HTTP_200_OK)
     except Report.DoesNotExist:
         return JsonResponse({"id": reportID, "message": "Report not found"}, status=status.HTTP_404_NOT_FOUND)
     except ValueError:
@@ -125,7 +100,7 @@ def reports_PPARAM(request, reportID):
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def reports_PPARAM_hide(request, reportID):
+def report_PPARAM_hide(request, reportID):
     
     if request.user.permissions < 4:
         return JsonResponse({"permission": 4, "message": "Insufficient permissions"}, status=status.HTTP_403_FORBIDDEN)

@@ -367,3 +367,194 @@ class GET_reports__TestCase(TestCase):
         request.META['HTTP_AUTHORIZATION'] = f'Token {self.user_reporter2_token}'
         response = reports(request)
         self.assertEqual(403, response.status_code)
+
+class GET_report_PPARAM__TestCase(TestCase):
+    def setUp(self):
+        # this is an ugly way to do this, but the report tags
+        # are hard baked into the system.
+        ReportTag.objects.get_or_create(name="Suspected violation of academic integrity")
+        ReportTag.objects.get_or_create(name="Offensive or inappropriate behavior")
+        ReportTag.objects.get_or_create(name="Hate speech")
+        ReportTag.objects.get_or_create(name="Spam")
+        ReportTag.objects.get_or_create(name="Promotion of illegal activities")
+        ReportTag.objects.get_or_create(name="Something else")
+
+        self.factory = APIRequestFactory()
+
+        self.user_admin = User.objects.create_user(uid='meiwang1',
+            password='insecurePassword', permissions=4)
+        self.user_admin_token = Token.objects.create(user=self.user_admin)
+        self.user_admin.displayname = 'TWVpbGkgV2FuZyAo546L576O5Li9KQ'
+        self.user_admin.pronouns = 'emllL2hpcg'
+        self.user_admin.save()
+
+        self.user_ta_ia = User.objects.create_user(uid='sorudai0', 
+            password='insecurePassword', permissions=2)
+        self.user_ta_ia_token = Token.objects.create(user=self.user_ta_ia)
+        self.user_ta_ia.displayname = 'U2XDoW4gw5MgUnVkYcOt'
+        self.user_ta_ia.pronouns = 'dGhleS90aGVt'
+        self.user_ta_ia.save()
+        
+        self.user_reporter = User.objects.create_user(uid='josmith8',
+            password='insecurePassword', permissions=1)
+        self.user_reporter_token = Token.objects.create(user=self.user_reporter)
+        self.user_reporter.displayname = 'Sm9obiBTbWl0aA'
+        self.user_reporter.pronouns = 'aGUvaGlt'
+        self.user_reporter.save()
+
+        self.user_reported = User.objects.create_user(uid='emuster2',
+            password='insecurePassword', permissions=1)
+        self.user_reported_token = Token.objects.create(user=self.user_reported)
+        self.user_reported.displayname = 'RXJpa2EgTXVzdGVybWFubg'
+        self.user_reported.pronouns = 'c2hlL2hlcg'
+        self.user_reported.save()
+        
+        self.tag = Tag.objects.create(name="Python")
+
+        self.thread = Thread.objects.create(
+            title=b64url_encode_str("Test Thread"), 
+        )
+        self.thread.tags.set([self.tag])
+
+        Message.objects.create(
+            author=self.user_reporter,
+            thread=self.thread,
+            body=b64url_encode_str("Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Sed congue auctor elit, sit amet cursus lectus sodales ut. Sed ut tempor lectus, sed pharetra lacus. Maecenas ultrices, nulla id vehicula faucibus, est enim convallis sem, nec feugiat eros risus a sem. Fusce rhoncus turpis ut ultricies fermentum. Nam dapibus dolor justo, vel tempor lorem bibendum vel. Ut dapibus ultrices lorem, sed fermentum est ultricies nec. Integer suscipit euismod tellus nec lobortis. Vestibulum suscipit efficitur felis, eget finibus enim fringilla sed. Morbi tincidunt, risus eget luctus suscipit, neque nunc ullamcorper velit, a commodo dui odio nec velit. Cras nec orci nec odio fermentum commodo."),
+            question=True
+        )
+
+        self.offending_message = Message.objects.create(
+            author=self.user_reported,
+            thread=self.thread,
+            body=b64url_encode_str("Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."),
+            question=False
+        )
+
+        self.report = Report.objects.create(
+            author=self.user_reporter,
+            message=self.offending_message,
+            comment="RG9uZWMgdWx0cmljZXMgYXJjdSBhIHRlbGx1cyBmZXJtZW50dW0gcHVsdmluYXIuIEFsaXF1YW0gbW9sZXN0aWUgYSBudW5jIHZpdGFlIHRpbmNpZHVudC4g",
+        )
+        self.report.reason.set(["Suspected violation of academic integrity"])
+    
+    def test_get(self):
+        # Get a report
+        # Create the request
+        request = self.factory.get(
+            path=f'/report/{str(self.report.id)}',
+            format='json'
+        )
+        request.META['HTTP_AUTHORIZATION'] = f'Token {self.user_admin_token}'
+
+        # Execute endpoint
+        response = report_PPARAM(request, str(self.report.id))
+        # Test DB queries against API structure
+        response_json = json.loads(response.content.decode('utf-8'))
+        db_report = Report.objects.get(id=self.report.id)
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(db_report.as_api(), response_json['report'])
+
+    def test_get_unprivileged(self):
+        # Get a report as an unprivliged user
+        # Create the request
+        request = self.factory.get(
+            path=f'/report/{str(self.report.id)}',
+            format='json'
+        )
+        request.META['HTTP_AUTHORIZATION'] = f'Token {self.user_ta_ia_token}'
+
+        # Execute endpoint
+        response = report_PPARAM(request, str(self.report.id))
+        # Test DB queries against API structure
+        self.assertEqual(403, response.status_code)
+
+        request.META['HTTP_AUTHORIZATION'] = f'Token {self.user_reporter_token}'
+        response = report_PPARAM(request, str(self.report.id))
+        self.assertEqual(403, response.status_code)
+
+    def test_get_invalid(self):
+        # Get a report with an invalid UUID
+        bogus_uuid = uuid.uuid4()
+        # Create the request.
+        request = self.factory.get(
+            path=f'/report/{str(bogus_uuid)}',
+            format='json'
+        )
+        request.META['HTTP_AUTHORIZATION'] = f'Token {self.user_admin_token}'
+
+        # Execute endpoint
+        response = report_PPARAM(request, str(bogus_uuid))
+        self.assertEqual(404, response.status_code)
+
+class GET_report_PPARAM_hide__TestCase(TestCase):
+    def setUp(self):
+        # this is an ugly way to do this, but the report tags
+        # are hard baked into the system.
+        ReportTag.objects.get_or_create(name="Suspected violation of academic integrity")
+        ReportTag.objects.get_or_create(name="Offensive or inappropriate behavior")
+        ReportTag.objects.get_or_create(name="Hate speech")
+        ReportTag.objects.get_or_create(name="Spam")
+        ReportTag.objects.get_or_create(name="Promotion of illegal activities")
+        ReportTag.objects.get_or_create(name="Something else")
+
+        self.factory = APIRequestFactory()
+
+        self.user_admin = User.objects.create_user(uid='meiwang1',
+            password='insecurePassword', permissions=4)
+        self.user_admin_token = Token.objects.create(user=self.user_admin)
+        self.user_admin.displayname = 'TWVpbGkgV2FuZyAo546L576O5Li9KQ'
+        self.user_admin.pronouns = 'emllL2hpcg'
+        self.user_admin.save()
+
+        self.user_ta_ia = User.objects.create_user(uid='sorudai0', 
+            password='insecurePassword', permissions=2)
+        self.user_ta_ia_token = Token.objects.create(user=self.user_ta_ia)
+        self.user_ta_ia.displayname = 'U2XDoW4gw5MgUnVkYcOt'
+        self.user_ta_ia.pronouns = 'dGhleS90aGVt'
+        self.user_ta_ia.save()
+        
+        self.user_reporter = User.objects.create_user(uid='josmith8',
+            password='insecurePassword', permissions=1)
+        self.user_reporter_token = Token.objects.create(user=self.user_reporter)
+        self.user_reporter.displayname = 'Sm9obiBTbWl0aA'
+        self.user_reporter.pronouns = 'aGUvaGlt'
+        self.user_reporter.save()
+
+        self.user_reported = User.objects.create_user(uid='emuster2',
+            password='insecurePassword', permissions=1)
+        self.user_reported_token = Token.objects.create(user=self.user_reported)
+        self.user_reported.displayname = 'RXJpa2EgTXVzdGVybWFubg'
+        self.user_reported.pronouns = 'c2hlL2hlcg'
+        self.user_reported.save()
+        
+        self.tag = Tag.objects.create(name="Python")
+
+        self.thread = Thread.objects.create(
+            title=b64url_encode_str("Test Thread"), 
+        )
+        self.thread.tags.set([self.tag])
+
+        Message.objects.create(
+            author=self.user_reporter,
+            thread=self.thread,
+            body=b64url_encode_str("Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Sed congue auctor elit, sit amet cursus lectus sodales ut. Sed ut tempor lectus, sed pharetra lacus. Maecenas ultrices, nulla id vehicula faucibus, est enim convallis sem, nec feugiat eros risus a sem. Fusce rhoncus turpis ut ultricies fermentum. Nam dapibus dolor justo, vel tempor lorem bibendum vel. Ut dapibus ultrices lorem, sed fermentum est ultricies nec. Integer suscipit euismod tellus nec lobortis. Vestibulum suscipit efficitur felis, eget finibus enim fringilla sed. Morbi tincidunt, risus eget luctus suscipit, neque nunc ullamcorper velit, a commodo dui odio nec velit. Cras nec orci nec odio fermentum commodo."),
+            question=True
+        )
+
+        self.offending_message = Message.objects.create(
+            author=self.user_reported,
+            thread=self.thread,
+            body=b64url_encode_str("Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."),
+            question=False
+        )
+
+        self.report = Report.objects.create(
+            author=self.user_reporter,
+            message=self.offending_message,
+            comment="RG9uZWMgdWx0cmljZXMgYXJjdSBhIHRlbGx1cyBmZXJtZW50dW0gcHVsdmluYXIuIEFsaXF1YW0gbW9sZXN0aWUgYSBudW5jIHZpdGFlIHRpbmNpZHVudC4g",
+        )
+        self.report.reason.set(["Suspected violation of academic integrity"])
+
+    def hide_unhidden(self):
+        # Hide an unhidden message
+        pass
