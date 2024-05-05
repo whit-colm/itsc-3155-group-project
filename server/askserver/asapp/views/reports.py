@@ -101,28 +101,30 @@ def report_PPARAM(request, reportID):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def report_PPARAM_hide(request, reportID):
-    
-    if request.user.permissions < 4:
+    if not request.user.permissions >> 2:
         return JsonResponse({"permission": 4, "message": "Insufficient permissions"}, status=status.HTTP_403_FORBIDDEN)
+    hide = request.data.get('hide')
+    if hide is None:
+        return JsonResponse({"message": "Required JSON parameter 'hide' missing"}, status=status.HTTP_400_BAD_REQUEST)
 
     try:
-        
-        uuid.UUID(reportID)
         report = Report.objects.get(id=reportID)
         
-        
-        hide = request.data.get('hide')
-        if hide is None:
-            return JsonResponse({"message": "Required JSON parameter 'hide' missing"}, status=status.HTTP_400_BAD_REQUEST)
+        report.message.hidden = hide
+        report.message.save()
+        if report.message.hidden:
+            thread = report.message.thread
 
-        
-        if report.message.hidden != hide:
-            report.message.hidden = hide
-            report.message.save()
-            action = "hidden" if hide else "unhidden"
-            return JsonResponse({"message": f"Message has been {action} successfully."}, status=status.HTTP_200_OK)
-        else:
-            return JsonResponse({"message": "No change in message visibility needed."}, status=status.HTTP_200_OK)
+            if thread.instructoraward == report.message:
+                thread.instructoraward = None
+            if thread.authoraward == report.message:
+                thread.authoraward = None
+            if thread.communityaward == report.message:
+                thread.communityaward = None
+            thread.save()
+            #print(thread.as_api())
+
+        return JsonResponse({"message": report.message.as_api()}, status=status.HTTP_200_OK)
 
     except Report.DoesNotExist:
         return JsonResponse({"id": reportID, "message": "Report not found"}, status=status.HTTP_404_NOT_FOUND)

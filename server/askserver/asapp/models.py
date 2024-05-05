@@ -101,9 +101,10 @@ class Message(models.Model):
         """
         return str(self.id)
 
-    def dead():
+    @classmethod
+    def dead(cls):
         # weird special case for deleted messages which shouldn't cascade.
-        return Message.objects.get_or_create(id=uuid.UUID(int = 0), author=User.dead)
+        return Message.objects.get_or_create(id=uuid.UUID(int = 0), author=User.dead())
 
     def as_api(self):
         return {
@@ -126,6 +127,15 @@ class Message(models.Model):
         constraints = [
             UniqueConstraint(name='question_message', fields=['thread', 'question'], condition=models.Q(question=True))
         ]
+
+    # Freako ChatGPT Hack to be able to set replying to a deleted message to
+    # the dead message.
+    def delete(self, *args, **kwargs):
+        # Set reply to the result of dead() when the related message is deleted
+        if self.reply:
+            self.reply = self.dead()[0]
+            self.save()
+        super().delete(*args, **kwargs)
 
 class Thread(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)

@@ -53,7 +53,7 @@ REST_FRAMEWORK = {
 }
 
 CORS_ALLOWED_ORIGINS = [
-    'http://localhost:3000',  # Add the origin from where the request is made
+    'http://localhost:3000', # Add the origin from where the request is made
     # Add more origins if needed
 ]
 
