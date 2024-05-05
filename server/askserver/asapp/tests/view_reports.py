@@ -106,9 +106,7 @@ class POST_reports_new__TestCase(TestCase):
         response = reports_new(request)
 
         # Test DB queries against API structure
-        self.assertEqual(400, response.status_code)
-
-        
+        self.assertEqual(400, response.status_code)     
 
     def test_create_with_invalid_message(self):
         # Create a report where the message does not exist
@@ -555,6 +553,174 @@ class GET_report_PPARAM_hide__TestCase(TestCase):
         )
         self.report.reason.set(["Suspected violation of academic integrity"])
 
-    def hide_unhidden(self):
+    def test_hide_unhidden(self):
         # Hide an unhidden message
-        pass
+        # make message unhidden
+        hide = True
+        self.offending_message.hidden = False
+        self.offending_message.save()
+        
+        j_data = {"hide": hide}
+
+        request = self.factory.post(
+            path=f'/report/{str(self.report)}/hide/',
+            data = j_data,
+            format='json',
+        )
+        request.META['HTTP_AUTHORIZATION'] = f'Token {self.user_admin_token}'
+
+        response = report_PPARAM_hide(request, str(self.report))
+        response_json = json.loads(response.content.decode('utf-8'))
+        db_report = Report.objects.get(id=self.report.id)
+
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(hide, db_report.message.hidden)
+        self.assertEqual(db_report.message.hidden, response_json['message']['hidden'])
+
+    def test_hide_hidden(self):
+        # Hide a hidden message
+        # make message hidden
+        hide = True
+        self.offending_message.hidden = True
+        self.offending_message.save()
+        
+        j_data = {"hide": hide}
+
+        request = self.factory.post(
+            path=f'/report/{str(self.report)}/hide/',
+            data = j_data,
+            format='json',
+        )
+        request.META['HTTP_AUTHORIZATION'] = f'Token {self.user_admin_token}'
+
+        response = report_PPARAM_hide(request, str(self.report))
+        response_json = json.loads(response.content.decode('utf-8'))
+        db_report = Report.objects.get(id=self.report.id)
+
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(hide, db_report.message.hidden)
+        self.assertEqual(db_report.message.hidden, response_json['message']['hidden'])
+
+    def test_unhide_hidden(self):
+        # Unhide a hidden message
+        # make message hidden
+        hide = False
+        self.offending_message.hidden = True
+        self.offending_message.save()
+        
+        j_data = {"hide": hide}
+
+        request = self.factory.post(
+            path=f'/report/{str(self.report)}/hide/',
+            data = j_data,
+            format='json',
+        )
+        request.META['HTTP_AUTHORIZATION'] = f'Token {self.user_admin_token}'
+
+        response = report_PPARAM_hide(request, str(self.report))
+        response_json = json.loads(response.content.decode('utf-8'))
+        db_report = Report.objects.get(id=self.report.id)
+
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(hide, db_report.message.hidden)
+        self.assertEqual(db_report.message.hidden, response_json['message']['hidden'])
+
+    def test_unhide_unhidden(self):
+        # Unhide an unhidden message
+        # make message hidden
+        hide = False
+        self.offending_message.hidden = False
+        self.offending_message.save()
+        
+        j_data = {"hide": hide}
+
+        request = self.factory.post(
+            path=f'/report/{str(self.report)}/hide/',
+            data = j_data,
+            format='json',
+        )
+        request.META['HTTP_AUTHORIZATION'] = f'Token {self.user_admin_token}'
+
+        response = report_PPARAM_hide(request, str(self.report))
+        response_json = json.loads(response.content.decode('utf-8'))
+        db_report = Report.objects.get(id=self.report.id)
+
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(hide, db_report.message.hidden)
+        self.assertEqual(db_report.message.hidden, response_json['message']['hidden'])
+
+    def test_hide_nonexistent_report(self):
+        # Hide a message which does not exist
+        hide = True
+        j_data = {"hide": hide}
+
+        bogus_uuid = uuid.uuid4()
+
+        request = self.factory.post(
+            path=f'/report/{str(bogus_uuid)}/hide/',
+            data = j_data,
+            format='json',
+        )
+        request.META['HTTP_AUTHORIZATION'] = f'Token {self.user_admin_token}'
+
+        response = report_PPARAM_hide(request, str(bogus_uuid))
+        response_json = json.loads(response.content.decode('utf-8'))
+        db_report = Report.objects.get(id=self.report.id)
+
+        self.assertEqual(404, response.status_code)
+
+    def test_hide_unhidden_unprivileged(self):
+        # Hide an unhidden message
+        # make message unhidden
+        hide = True
+        self.offending_message.hidden = False
+        self.offending_message.save()
+        
+        j_data = {"hide": hide}
+
+        request = self.factory.post(
+            path=f'/report/{str(self.report)}/hide/',
+            data = j_data,
+            format='json',
+        )
+        request.META['HTTP_AUTHORIZATION'] = f'Token {self.user_ta_ia_token}'
+
+        response = report_PPARAM_hide(request, str(self.report))
+        response_json = json.loads(response.content.decode('utf-8'))
+        db_report = Report.objects.get(id=self.report.id)
+
+        self.assertEqual(403, response.status_code)
+
+    def test_hide_awarded(self):
+        # Hide a message with an award
+        # make message unhidden & give it award
+        hide = True
+        self.offending_message.hidden = False
+        self.offending_message.save()
+
+        self.offending_message.thread.instructoraward = self.offending_message
+        self.offending_message.thread.authoraward = self.offending_message
+        self.offending_message.thread.communityaward = self.offending_message
+        self.offending_message.thread.save()
+        
+        j_data = {"hide": hide}
+
+        request = self.factory.post(
+            path=f'/report/{str(self.report)}/hide/',
+            data = j_data,
+            format='json',
+        )
+        request.META['HTTP_AUTHORIZATION'] = f'Token {self.user_admin_token}'
+
+        response = report_PPARAM_hide(request, str(self.report))
+        response_json = json.loads(response.content.decode('utf-8'))
+
+        self.assertEqual(200, response.status_code)
+        # for some. goddamn. miserable. what-the-hell reason. You have to do
+        # ANOTHER query or else it just Won't Work. It's 01:00 and I'm fucking
+        # PISSED.
+        insane = Thread.objects.get(id=self.offending_message.thread.id)
+        self.assertNotEqual(insane.instructoraward, self.offending_message)
+        self.assertNotEqual(insane.authoraward, self.offending_message)
+        self.assertNotEqual(insane.communityaward, self.offending_message)
+        self.assertTrue(response_json['message']['hidden'])
