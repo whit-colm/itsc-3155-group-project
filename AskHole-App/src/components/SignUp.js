@@ -15,9 +15,12 @@ function SignUpPage() {
   ];
 
   const handleLogin = async (user) => {
+    console.log("Hello, Fruit!")
+    console.log(`Token ${user.key}`)
     try {
       const response = await axios.get('http://localhost:8000/objs/profile/', {
         headers: {
+          Accept: `application/json`,
           Authorization: `Token ${user.key}`
         }
       });

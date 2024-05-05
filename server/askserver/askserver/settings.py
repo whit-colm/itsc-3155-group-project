@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'oauth2_provider',
     'rest_framework.authtoken',
+    'corsheaders',
     'asapp',
 ]
 
@@ -51,10 +52,30 @@ REST_FRAMEWORK = {
     ),
 }
 
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:3000',  # Add the origin from where the request is made
+    # Add more origins if needed
+]
+
+CORS_ALLOW_METHODS = [
+    'GET',  # Add the HTTP methods you want to allow
+    'POST',
+    'PUT',
+    'PATCH',
+    'DELETE',
+    'OPTIONS',
+]
+
+CORS_ALLOW_HEADERS = [
+    'Accept',  # Add the headers you want to allow
+    'Authorization',
+    'Content-Type',
+]
 
 AUTH_USER_MODEL = 'asapp.User'
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
