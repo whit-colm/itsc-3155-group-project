@@ -14,7 +14,7 @@ from asapp.b64url_enhancement import check_base64
 @permission_classes([IsAuthenticated])
 def reports(request):
     
-    if request.user.permissions < 4:
+    if not request.user.permissions >> 2:
         return JsonResponse({"permission": 4, "message": "Insufficient permissions"}, status=status.HTTP_403_FORBIDDEN)
 
     try:
@@ -26,31 +26,9 @@ def reports(request):
         paginator = Paginator(reports, limit)
         page_obj = paginator.get_page(offset // limit + 1)
 
-        reports_data = [{
-            "id": report.id,
-            "message": {
-                "id": report.message.id,
-                "threadID": report.message.thread.id,
-                "author": {
-                    "uid": report.message.author.uid,
-                    "displayname": report.message.author.displayname,
-                    "pronouns": report.message.author.pronouns
-                },
-                "date": int(report.message.date.timestamp()),
-                "votes": report.message.votes,
-                "reply": None,
-                "content": report.message.body,
-                "hidden": report.message.hidden
-            },
-            "author": {
-                "uid": report.author.uid,
-                "displayname": report.author.displayname,
-                "pronouns": report.author.pronouns
-            },
-            "date": int(report.date.timestamp()),
-            "reason": report.reason,
-            "comment": report.comment
-        } for report in page_obj]
+        reports_data = []
+        for report in page_obj:
+            reports_data.append(report.as_api())
 
         return JsonResponse({"reports": reports_data}, safe=False, status=status.HTTP_200_OK)
         
@@ -106,7 +84,7 @@ def reports_new(request):
 @permission_classes([IsAuthenticated])
 def reports_PPARAM(request, reportID):
     
-    if request.user.permissions < 4:
+    if request.user.permissions >> 2:
         return JsonResponse({"permission": 4, "message": "Insufficient permissions"}, status=status.HTTP_403_FORBIDDEN)
 
     try:
