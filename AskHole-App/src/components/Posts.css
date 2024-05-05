@@ -1,10 +1,18 @@
 /* Posts.css */
 
 .searchBar {
-  width: 50%; /* Adjust as needed */
+  width: 40%; /* Adjust as needed */
   padding: 10px;
   margin: 20px auto; /* Center the search bar */
   font-size: 16px;
+}
+
+.createThreadButton {
+  margin-right: 10px; /* Add margin to separate from filter button */
+}
+
+.filterButton {
+  margin-left: 10px; /* Add margin to separate from create thread button */
 }
 
 .post-list {
@@ -46,6 +54,7 @@
 .post-item button:hover {
   background-color: darkblue;
 }
+
 .kabob-menu {
   position: absolute;
   top: 5px; /* Adjust top position */

@@ -34,7 +34,9 @@
   display: block;
 }
 
-.modal-content input {
+.modal-content input[type="text"],
+.modal-content input[type="checkbox"],
+.modal-content select {
   width: calc(100% - 12px);
   padding: 6px;
   margin-bottom: 10px;
@@ -56,4 +58,16 @@
 
 .modal-content button:hover {
   background-color: lightblue;
+}
+
+.modal-content select {
+  display: inline-block;
+  padding: 5px;
+  border-radius: 4px;
+}
+
+.modal-content label[for="anonymous"] {
+  display: inline-block;
+  vertical-align: middle;
+  margin-bottom: 5px;
 }

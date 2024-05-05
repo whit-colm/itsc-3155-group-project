@@ -8,12 +8,14 @@ const Posts = () => {
   const [posts, setPosts] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [showMenu, setShowMenu] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
+  const [tagFilter, setTagFilter] = useState('');
 
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const response = await axios.get('https://jsonplaceholder.typicode.com/posts');
+        const response = await axios.get('https://askhole.api.dotfile.sh/v0alpha0/threads/');
         setPosts(response.data);
       } catch (error) {
         console.error(error);
@@ -34,24 +36,37 @@ const Posts = () => {
   const handleSubmit = (formData) => {
     // Prepend new post to posts array
     setPosts([formData, ...posts]);
-    setIsModalOpen(false);
+    setIsCreateModalOpen(false);
+  };
+
+  const handleTagFilter = (event) => {
+    setTagFilter(event.target.value);
+  };
+
+  const applyTagFilter = () => {
+    setSearchTerm('');
+    setIsFilterModalOpen(false);
   };
 
   const filteredPosts = posts.filter(post =>
-    post.title.toLowerCase().includes(searchTerm.toLowerCase())
+    post.title.toLowerCase().includes(searchTerm.toLowerCase()) &&
+    (tagFilter === '' || post.tags.includes(tagFilter.toLowerCase()))
   );
 
   return (
     <div className="post-list">
-      <input
-        type="text"
-        placeholder="Search by title"
-        value={searchTerm}
-        onChange={handleSearch}
-        className='searchBar'
-      />
-      <button onClick={() => setIsModalOpen(true)}>Create Thread</button>
-      <CreateThreadsModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSubmit={handleSubmit} />
+      <div className="search-bar-container">
+        <input
+          type="text"
+          placeholder="Search by title"
+          value={searchTerm}
+          onChange={handleSearch}
+          className='searchBar'
+        />
+        <button onClick={() => setIsCreateModalOpen(true)} className="createThreadButton">Create Thread</button>
+        <button onClick={() => setIsFilterModalOpen(true)} className="filterButton">Filter by Tag</button>
+      </div>
+      <CreateThreadsModal isOpen={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)} onSubmit={handleSubmit} />
       {filteredPosts.map((post) => (
         <div key={post.id} className="post-item">
           <div className="kabob-menu" onClick={() => toggleMenu(post.id)}>
@@ -69,6 +84,20 @@ const Posts = () => {
           <Link to={`/posts/${post.id}`}>Read More</Link>
         </div>
       ))}
+      {isFilterModalOpen && (
+        <div className="modal">
+          <div className="modal-content">
+            <h2>Filter by Tag</h2>
+            <input
+              type="text"
+              placeholder="Enter tag"
+              value={tagFilter}
+              onChange={handleTagFilter}
+            />
+            <button onClick={applyTagFilter}>Apply</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
