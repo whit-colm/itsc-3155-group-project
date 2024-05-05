@@ -27,20 +27,26 @@ const CreateThreadsModal = ({ isOpen, onClose, onSubmit }) => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {
+      const token = localStorage.getItem('token'); // Retrieve the token from localStorage
+      if (!token) {
+        throw new Error('No token found in localStorage');
+      }
+  
       const threadData = {
-        threadID: generateUUID(),
-        author: { 
-          userID: 'user123',
-          username: 'example_user',
-        },
         title: btoa(title),
-        bodyshort: btoa(body.substring(0, 64)),
-        date: Math.floor(Date.now() / 1000),
-        tags,
-        anonymous,
+        body: btoa(body),
+        anonymous: anonymous,
+        tags: tags,
       };
-
-      const response = await axios.post('https://askhole.api.dotfile.sh/v0alpha0/threads/', threadData);
+  
+      const response = await axios.post('http://localhost:8000/threads/new/', threadData, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': `Token ${token}`
+        }
+      });
+  
       console.log('New thread created:', response.data);
       onSubmit(response.data);
       onClose();
@@ -49,15 +55,7 @@ const CreateThreadsModal = ({ isOpen, onClose, onSubmit }) => {
       console.error('Error creating new thread:', error);
     }
   };
-
-  const generateUUID = () => {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-      var r = Math.random() * 16 | 0,
-          v = c === 'x' ? r : (r & 0x3 | 0x8);
-      return v.toString(16);
-    });
-  };
-
+  
   return (
     <div className={`modal ${isOpen ? 'open' : ''}`}>
       <div className="modal-content">
@@ -70,6 +68,7 @@ const CreateThreadsModal = ({ isOpen, onClose, onSubmit }) => {
               id="Title"
               value={title}
               onChange={handleTitleChange}
+              required
             />
           </div>
           <div>
@@ -79,22 +78,35 @@ const CreateThreadsModal = ({ isOpen, onClose, onSubmit }) => {
               id="body"
               value={body}
               onChange={handleBodyChange}
+              required
             />
           </div>
           <div>
             <label htmlFor="tags">Tags:</label>
-            <input
-              type="text"
+            <select
               id="tags"
               value={tags.join(',')}
               onChange={handleTagChange}
-            />
+              required
+            >
+              <option value="">Select Tag</option>
+              <option value="Python">Python</option>
+              <option value="Java">Java</option>
+              <option value="Calc">Calc</option>
+              <option value="CCI">CCI</option>
+              <option value="API">API</option>
+            </select>
           </div>
           <div>
             <label htmlFor="anonymous">Post Anonymously:</label>
-            <select id="anonymous" value={anonymous.toString()} onChange={handleAnonymousChange}>
-              <option value="true">True</option>
+            <select
+              id="anonymous"
+              value={anonymous.toString()}
+              onChange={handleAnonymousChange}
+              required
+            >
               <option value="false">False</option>
+              <option value="true">True</option>
             </select>
           </div>
           <button type="submit">Submit</button>

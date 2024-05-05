@@ -1,116 +1,63 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
-import './PostDetails.css'; // Import the CSS file for styling
 
 const PostDetails = () => {
   const { postId } = useParams();
   const [post, setPost] = useState(null);
-  const [comments, setComments] = useState([]);
-  const [commentText, setCommentText] = useState('');
-  const [showMenu, setShowMenu] = useState(null); // State to track which comment's menu is open
 
   useEffect(() => {
     const fetchPost = async () => {
       try {
-        const response = await axios.get(`https://jsonplaceholder.typicode.com/posts/${postId}`);
-        setPost(response.data);
-      } catch (error) {
-        console.error(error);
-      }
-    };
+        const token = localStorage.getItem('token');
+        if (!token) {
+          console.error('No token found in localStorage');
+          return;
+        }
 
-    const fetchComments = async () => {
-      try {
-        const response = await axios.get(`https://jsonplaceholder.typicode.com/posts/${postId}/comments`);
-        setComments(response.data);
+        const response = await axios.get(`http://localhost:8000/thread/${postId}/`, {
+          headers: {
+            Accept: 'application/json',
+            Authorization: `Token ${token}`,
+          },
+        });
+        
+        if (response.status === 200) {
+          setPost(response.data);
+        } else {
+          console.error('Failed to fetch post:', response.statusText);
+        }
       } catch (error) {
-        console.error(error);
+        console.error('Error fetching post:', error.message);
       }
     };
 
     fetchPost();
-    fetchComments();
   }, [postId]);
-
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    try {
-      const response = await axios.post(`https://jsonplaceholder.typicode.com/posts/${postId}/comments`, {
-        postId,
-        body: commentText,
-      });
-      const newComment = response.data;
-      setComments([...comments, newComment]);
-      setCommentText('');
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  // Function to toggle the menu for a comment
-  const toggleMenu = (commentId) => {
-    setShowMenu(showMenu === commentId ? null : commentId);
-  };
 
   if (!post) {
     return <div>Loading...</div>;
   }
 
-  const handleLike = (postId) => {
-    console.log(`Liked post with ID ${postId}`);
-  };
-
   return (
-    <div className="post-details-container">
-      <h2 className="post-title">{post.title}</h2>
-      <p className="post-body">{post.body}</p>
-
-      <h3 className="comments-header">Comments</h3>
-      <div className="comments-container">
-        {comments.map(comment => (
-          <div key={comment.id} className="comment-box">
-            {/* Icons */}
-            <div className="comment-icons">
-              {/* Icon 1 */}
-              <div className="icon">Icon 1</div>
-              {/* Icon 2 */}
-              <div className="icon">Icon 2</div>
-              {/* Icon 3 */}
-              <div className="icon">Icon 3</div>
-            </div>
-            {/* End of Icons */}
-
-            {/* Kabob menu */}
-            <div className="kabob-menu" onClick={() => toggleMenu(comment.id)}>
-              <div className="kabob-icon"></div>
-              {showMenu === comment.id && (
-                <div className="kabob-content">
-                  <p>Username: {comment.userName}</p>
-                  <button onClick={() => console.log("Block")}>Block</button>
-                  <button onClick={() => console.log("Report")}>Report</button>
-                </div>
-              )}
-            </div>
-            {/* End of Kabob menu */}
-
-            <strong className="comment-name">{comment.name}</strong>: 
-            <p className="comment-body">{comment.body}</p>
-            <button onClick={() => handleLike(post.id)}>Like</button>
-          </div>
-        ))}
+    <div className="post-details">
+      <h1>{post.title}</h1>
+      <div className="question">
+        <h2>Question:</h2>
+        <p>{post.question.content}</p>
       </div>
-
-      <form onSubmit={handleSubmit} className="comment-form">
-        <textarea
-          value={commentText}
-          onChange={(e) => setCommentText(e.target.value)}
-          placeholder="Leave a comment..."
-          required
-          className="comment-input"
-        ></textarea>
-        <button type="submit" className="comment-submit-btn">Submit</button>
-      </form>
+      <div className="responses">
+        <h2>Responses:</h2>
+        <ul>
+          {post.responses.map((response, index) => (
+            <li key={index}>{response.message}</li>
+          ))}
+        </ul>
+      </div>
+      <div className="comment-form">
+        <textarea rows="4" cols="50" placeholder="Write your response..."></textarea>
+        <button>Submit</button>
+      </div>
     </div>
   );
 };

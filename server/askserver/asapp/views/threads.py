@@ -146,9 +146,11 @@ def anonymize_and_hide(jsonobject: dict, user: User, messageThreadAnonymous=None
                 # Now, the estute among you will realize we did 3 of those,
                 # i.e. only in this situation could a message ever be anonymous
                 # so just do that fourth check
-                if (a_uid == thread['lastinteraction']['author']['uid']):
-                    thread['lastinteraction']['author']['uid'] = thread['author']['uid']
-                    thread['lastinteraction']['author']['pronouns'] = thread['author']['pronouns']
+                if 'lastinteraction' in thread and thread['lastinteraction'] and 'author' in thread['lastinteraction']:
+                    if a_uid == thread['lastinteraction']['author']['uid']:
+                        thread['lastinteraction']['author']['uid'] = thread['author']['uid']
+                        thread['lastinteraction']['author']['pronouns'] = thread['author']['pronouns']
+
 
 
 

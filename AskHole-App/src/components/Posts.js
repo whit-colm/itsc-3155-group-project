@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import './Posts.css';
 import CreateThreadsModal from './CreateThreadsModal';
 
@@ -11,14 +11,34 @@ const Posts = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [tagFilter, setTagFilter] = useState('');
+  const [redirect, setRedirect] = useState(null);
 
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const response = await axios.get('https://askhole.api.dotfile.sh/v0alpha0/threads/');
-        setPosts(response.data);
+        const token = localStorage.getItem('token');
+        if (token) {
+          const response = await axios.get('http://localhost:8000/threads/', {
+            headers: {
+              Accept: 'application/json',
+              Authorization: `Token ${token}`,
+            },
+          });
+          if (response.status === 200) {
+            const decodedPosts = response.data.threads.map(post => ({
+              ...post,
+              title: atob(post.title),
+              bodyshort: atob(post.bodyshort)
+            }));
+            setPosts(decodedPosts);
+          } else {
+            console.error('Failed to fetch posts:', response.statusText);
+          }
+        } else {
+          console.log('No token found in localStorage');
+        }
       } catch (error) {
-        console.error(error);
+        console.error('Error fetching posts:', error.message);
       }
     };
 
@@ -29,12 +49,11 @@ const Posts = () => {
     setSearchTerm(event.target.value);
   };
 
-  const toggleMenu = (postId) => {
-    setShowMenu(showMenu === postId ? null : postId);
+  const toggleMenu = (threadID) => {
+    setShowMenu(showMenu === threadID ? null : threadID);
   };
 
   const handleSubmit = (formData) => {
-    // Prepend new post to posts array
     setPosts([formData, ...posts]);
     setIsCreateModalOpen(false);
   };
@@ -48,9 +67,18 @@ const Posts = () => {
     setIsFilterModalOpen(false);
   };
 
-  const filteredPosts = posts.filter(post =>
-    post.title.toLowerCase().includes(searchTerm.toLowerCase()) &&
-    (tagFilter === '' || post.tags.includes(tagFilter.toLowerCase()))
+  const handlePostClick = (threadID) => {
+    setRedirect(`/posts/${threadID}`);
+  };
+
+  if (redirect) {
+    return <Navigate to={redirect} />;
+  }
+
+  const filteredPosts = posts.filter(
+    (post) =>
+      post.title.toLowerCase().includes(searchTerm.toLowerCase()) &&
+      (tagFilter === '' || post.tags.includes(tagFilter.toLowerCase()))
   );
 
   return (
@@ -61,29 +89,40 @@ const Posts = () => {
           placeholder="Search by title"
           value={searchTerm}
           onChange={handleSearch}
-          className='searchBar'
+          className="searchBar"
         />
-        <button onClick={() => setIsCreateModalOpen(true)} className="createThreadButton">Create Thread</button>
-        <button onClick={() => setIsFilterModalOpen(true)} className="filterButton">Filter by Tag</button>
+        <button onClick={() => setIsCreateModalOpen(true)} className="createThreadButton">
+          Create Thread
+        </button>
+        <button onClick={() => setIsFilterModalOpen(true)} className="filterButton">
+          Filter by Tag
+        </button>
       </div>
-      <CreateThreadsModal isOpen={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)} onSubmit={handleSubmit} />
-      {filteredPosts.map((post) => (
-        <div key={post.id} className="post-item">
-          <div className="kabob-menu" onClick={() => toggleMenu(post.id)}>
-            <div className="kabob-icon"></div>
-            {showMenu === post.id && (
-              <div className="kabob-content">
-                <p>Username: {post.userName}</p>
-                <button onClick={() => console.log("Block")}>Block</button>
-                <button onClick={() => console.log("Report")}>Report</button>
-              </div>
-            )}
+      <CreateThreadsModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        onSubmit={handleSubmit}
+      />
+      {filteredPosts.map((post, index) => {
+        console.log('Thread ID:', post.threadID);
+        return (
+          <div key={index} className="post-item" onClick={() => handlePostClick(post.threadID)}>
+            <p>{post.anonymous ? 'Posted Anonymously' : `Username: ${post.author.uid}`}</p>
+            <h2 className="post-title">{post.title}</h2>
+            <p className="post-body">{post.bodyshort}</p>
+            <div className="kabob-menu" onClick={() => toggleMenu(post.threadID)}>
+              <div className="kabob-icon"></div>
+              {showMenu === post.threadID && (
+                <div className="kabob-content">
+                  <button onClick={() => console.log('Block')}>Block</button>
+                  <button onClick={() => console.log('Report')}>Report</button>
+                </div>
+              )}
+            </div>
+            <Link to={`/posts/${post.threadID}`}>Read More</Link>
           </div>
-          <h2 className="post-title">{post.title}</h2>
-          <p className="post-body">{post.body}</p>
-          <Link to={`/posts/${post.id}`}>Read More</Link>
-        </div>
-      ))}
+        );
+      })}
       {isFilterModalOpen && (
         <div className="modal">
           <div className="modal-content">

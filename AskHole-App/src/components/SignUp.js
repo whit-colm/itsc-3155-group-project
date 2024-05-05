@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import './SignUp.css';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate from react-router-dom
 
-function SignUpPage() {
+function SignUp() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [error, setError] = useState('');
+  const navigate = useNavigate(); // Initialize useNavigate
 
   const users = [
     { uid: "josmith8", key: "f4142853e253d686875d9f7a1a1575acaa8a2eb7", permissions: 7 },
@@ -25,17 +27,35 @@ function SignUpPage() {
         }
       });
       console.log(response.data); // Log user information
+      setSelectedUser(user); // Set selectedUser to the logged-in user
       setIsLoggedIn(true);
+      
+      // Check if there is already a token in local storage
+      const existingToken = localStorage.getItem('token');
+      if (existingToken) {
+        // Clear the existing token
+        localStorage.removeItem('token');
+      }
+      
+      // Set the new token in local storage
+      localStorage.setItem('token', user.key);
     } catch (error) {
       setError('Failed to log in. Please try again.');
       console.error('Login failed:', error);
     }
+  };
+  
+
+  const handleOpenThreads = () => {
+    // Navigate to /home
+    navigate('/home');
   };
 
   if (isLoggedIn) {
     return (
       <div className='Profile-container'>
         <h1>Welcome Back, {selectedUser.uid}!</h1>
+        <button onClick={handleOpenThreads}>Open Threads</button>
         {/* Add profile content here */}
       </div>
     );
@@ -54,4 +74,4 @@ function SignUpPage() {
   }
 }
 
-export default SignUpPage;
+export default SignUp;
