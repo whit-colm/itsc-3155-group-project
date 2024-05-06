@@ -1,14 +1,30 @@
 /* Posts.css */
 
+.search-bar-container {
+  display: flex;
+  justify-content: center; /* Center the content horizontally */
+  align-items: center;
+  margin-bottom: 20px;
+}
+
 .searchBar {
-  width: 40%;
+  width: 60%; /* Increase the width */
   padding: 10px;
-  margin: 20px auto;
   font-size: 16px;
 }
 
 .createThreadButton {
-  margin-right: 10px;
+  background-color: blue;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-left: auto; /* Push the button to the right */
+}
+
+.createThreadButton:hover {
+  background-color: darkblue;
 }
 
 .filterButton {
@@ -22,7 +38,7 @@
 }
 
 .post-item {
-  position: relative; /* Add relative positioning */
+  position: relative;
   background-color: #f2f2f2;
   border-radius: 5px;
   border-color: black;
@@ -72,7 +88,7 @@
 
 .kabob-content {
   position: absolute;
-  top: 100%; /* Adjust top position relative to parent */
+  top: 100%;
   right: 0;
   background-color: #fff;
   border: 1px solid #ccc;

@@ -58,3 +58,52 @@
 .form-container button:hover {
   background-color: darkblue;
 }
+.Profile-container button {
+  width: 200px; /* Set the width of the button */
+  padding: 10px;
+  background-color: #007bff; /* Blue color */
+  color: white; /* Text color */
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 20px; /* Add margin from the top */
+}
+
+.Profile-container button:hover {
+  background-color: #0056b3; /* Darker blue color on hover */
+}
+.Profile-container {
+  height: 100vh;
+  display: flex;
+  flex-direction: column; /* Ensure items are stacked vertically */
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+  z-index: 1;
+}
+
+.Profile-container h1 {
+  margin-bottom: 20px; /* Add margin below the welcome back message */
+}
+
+.Profile-container button {
+  width: 200px;
+  padding: 10px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.Profile-container button:hover {
+  background-color: #0056b3;
+}
+
+.Profile-wrapper {
+  max-width: 600px; /* Set maximum width for the content */
+  padding: 20px; /* Add padding to create space between content and the container */
+  border-radius: 10px; /* Add border radius for rounded corners */
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3); /* Add box shadow for depth */
+}

@@ -54,16 +54,20 @@ function SignUp() {
   if (isLoggedIn) {
     return (
       <div className='Profile-container'>
+        <video src='/video/SignUpVideo.mp4' autoPlay loop muted />
+        <div className="Profile-wrapper">
         <h1>Welcome Back, {selectedUser.uid}!</h1>
         <button onClick={handleOpenThreads}>Open Threads</button>
         {/* Add profile content here */}
+        </div>
       </div>
     );
   } else {
     return (
       <div className='SignUp-container'>
+        <video src='/video/SignUpVideo.mp4' autoPlay loop muted />
         <div className="form-container">
-          <h1>Tester Login</h1>
+          <h1>Login</h1>
           {users.map((user, index) => (
             <button key={index} onClick={() => handleLogin(user)}>{user.uid}</button>
           ))}

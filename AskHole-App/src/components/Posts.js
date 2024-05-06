@@ -58,14 +58,6 @@ const Posts = () => {
     setIsCreateModalOpen(false);
   };
 
-  const handleTagFilter = (event) => {
-    setTagFilter(event.target.value);
-  };
-
-  const applyTagFilter = () => {
-    setSearchTerm('');
-    setIsFilterModalOpen(false);
-  };
 
   const handlePostClick = (threadID) => {
     setRedirect(`/posts/${threadID}`);
@@ -94,10 +86,9 @@ const Posts = () => {
         <button onClick={() => setIsCreateModalOpen(true)} className="createThreadButton">
           Create Thread
         </button>
-        <button onClick={() => setIsFilterModalOpen(true)} className="filterButton">
-          Filter by Tag
-        </button>
       </div>
+
+
       <CreateThreadsModal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
@@ -123,20 +114,6 @@ const Posts = () => {
           </div>
         );
       })}
-      {isFilterModalOpen && (
-        <div className="modal">
-          <div className="modal-content">
-            <h2>Filter by Tag</h2>
-            <input
-              type="text"
-              placeholder="Enter tag"
-              value={tagFilter}
-              onChange={handleTagFilter}
-            />
-            <button onClick={applyTagFilter}>Apply</button>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

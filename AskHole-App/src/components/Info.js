@@ -5,17 +5,17 @@ import './Info.css';
 const Info = () => {
   const frontendTeam = [
     {
-      name: 'John Doe',
+      name: 'Daniel Remington',
       role: 'Front-end Developer',
       image: '/images/john.jpg',
     },
     {
-      name: 'Jane Smith',
+      name: 'Tyler Read',
       role: 'Front-end Developer',
       image: '/images/jane.jpg',
     },
     {
-      name: 'Alex Johnson',
+      name: 'Mina Yuakeem',
       role: 'Front-end Developer',
       image: '/images/alex.jpg',
     },
@@ -23,29 +23,24 @@ const Info = () => {
 
   const backendTeam = [
     {
-      name: 'Sarah Brown',
+      name: 'Whit Huntley (They/Them)',
       role: 'Back-end Developer',
       image: '/images/sarah.jpg',
     },
     {
-      name: 'Mike Davis',
+      name: 'Gage Gasparyan',
       role: 'Back-end Developer',
       image: '/images/mike.jpg',
     },
     {
-      name: 'Emily White',
+      name: 'Bryan Banda Cortes',
       role: 'Back-end Developer',
       image: '/images/emily.jpg',
     },
     {
-      name: 'David Wilson',
+      name: 'Nabina Tiwari',
       role: 'Back-end Developer',
       image: '/images/david.jpg',
-    },
-    {
-      name: 'Grace Lee',
-      role: 'Back-end Developer',
-      image: '/images/grace.jpg',
     },
   ];
 
